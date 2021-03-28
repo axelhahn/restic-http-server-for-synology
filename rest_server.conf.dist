@@ -1,0 +1,45 @@
+# ======================================================================
+#
+# HTTP REST SERVER CONFIG FILE
+#
+#
+# a relative path is relative to restic_server.sh - or use absolute
+#
+# ======================================================================
+
+
+
+# where to find binary of http rest server - no need to change
+dir_server=rest-server
+
+# place of key and cert; it is specific for Synonlogy NAS - no need to change
+dir_cert=/usr/syno/etc/certificate/system/default
+
+
+# listen port of rest server; 8000 is default
+listen=':8000'
+
+# webroot of backup data
+dir_data=data
+
+# path of log
+logfile=log/restic-server.log
+
+
+# ----------------------------------------------------------------------
+#
+# flags for restic server process
+#
+appendonly=0
+privaterepos=1
+noauth=1
+
+
+# ----------------------------------------------------------------------
+#
+# user admin
+#
+# length of user password for a new user
+pwlength=32
+
+# ----------------------------------------------------------------------
