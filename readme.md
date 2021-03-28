@@ -8,17 +8,6 @@ A set of bash scripts to
 * Service handling: start/stop/status of server
 * A user administration for access private repos handles user entries in [webroot]/.htpasswd
 
-### Status
-
-solved:
-
-* Installation of rest http binary
-* service script with start/stop/status
-* conf file to customize restic-server
-* use htts with Let's encrypt certificate
-* 
-
-
 ## License
 
 GNU GP 3.0
@@ -30,7 +19,7 @@ GNU GP 3.0
 Web based stuff:
 
 * WebLogin to your Synology with an admin user
-* Actiivate DDNS for your NAS
+* Activate DDNS for your NAS
 * Activate ssl certificate for your NAS - what is using Let's Encrypt
 
 Via SSH console:
@@ -131,12 +120,9 @@ In short: a user [user] gets access to [backup-url]:[port]/[user]/ only ... with
 Execute `./useradmin.sh add USERNAME` to create (or update) a user with a generated password (32 chars by default).
 Execute `./useradmin.sh status` to see all users and their used size.
 
-
 ### start service
 
 Execute `./rest_server.sh start` to start server.
-
-
 
 ## Status
 
@@ -144,8 +130,8 @@ In short: work in progress.
 
 DONE
 
-* installation process
-* use https
+* installation process for binary and initial running config
+* use https (using Let's Encrypt certicate of the system)
 * handle service start|stop|status
 * configure service behaviour in a conf file
 * add/ update users for private repositories
