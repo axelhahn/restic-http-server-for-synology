@@ -6,7 +6,7 @@ A set of bash scripts to
 
 * Install rest http server on a Synology NAS.
 * Service handling: start/stop/status of server
-* A user administration for access private repos handles user entries in [webroot]/.htpasswd
+* A user administration for access to private repos; it handles user entries in [webroot]/.htpasswd (using openssl)
 
 Source: https://github.com/axelhahn/restic-http-server-for-synology
 
@@ -27,8 +27,8 @@ Web based stuff:
 Via SSH console:
 
 * Login to your Synology with an admin account
-* Make a sudo -i to become root
-* Create a directory, i.e. /volume1/opt/restic
+* Make a `sudo -i` to become root
+* Create a directory, i.e. `/volume1/opt/restic`
 * Copy the files of the project there
 
 The result is something like that:
