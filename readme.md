@@ -14,6 +14,21 @@ Source: https://github.com/axelhahn/restic-http-server-for-synology
 
 GNU GP 3.0
 
+## Introduction
+
+Restic client: https://restic.net/ - it is an opensource backup tool. 
+
+It is very fast and uses deduplication. Copy a single to your client binary and use it. 
+It stores backup data on (USB) disk, SFTP, S3 or other backend supported by rclone.
+
+To use https as backend there is a rest http server. https://github.com/restic/rest-server
+
+If you have a Synology NAS at home then this repository helps you to install that https
+backend and maintain users.
+
+On your Windows/ Linux/ Mac OS client you additionally need to install the client and configure
+the backend url of the https server.
+
 ## Installation
 
 ### Prepare
@@ -180,7 +195,7 @@ In short: work in progress.
 
 DONE
 
-* installation process for binary and initial running config
+* installation for binary and initial running config
 * use https (using Let's Encrypt certicate of the system)
 * handle service start|stop|status
 * configure service behaviour in a conf file
