@@ -7,6 +7,7 @@
 # License: GNU GPL 3.0
 # ----------------------------------------------------------------------
 # 2021-03-29  www.axelhahn.de  init ... but WIP
+# 2021-03-30  www.axelhahn.de  added logrotation ... but WIP
 # ======================================================================
 
 #defaults
@@ -126,7 +127,7 @@ function stop(){
         if [ $? -eq 0 ]; then
                 _addlog "stop $PRODUCT"
                 echo -n "Stopping $PRODUCT ... "
-                killall $mybin
+                killall "$( basename $mybin )"
                 check_running_server >/dev/null
                 if [ $? -eq 0 ]; then
                         echo "FAILED"
@@ -150,7 +151,22 @@ function restart(){
         start
 }
 
+function logrotate(){
+        local rotLog=$logfile.$( date +%Y-%m-%d )
+        local keep=7
 
+        ls $rotLog* >/dev/null 2>&1
+        if [ $? -eq 0 ]; then
+                echo 'SKIP: rotation was already done today'
+        else
+                echo 'Starting logrotation...'
+                ( stop )
+                mv $logfile $rotLog
+                ( start )
+        fi
+        echo 'Cleanup old logs'
+        find $( dirname $logfile ) -type f -name "$( basename $logfile).*" -mtime +$keep -print -delete
+}
 
 # ------------------------------------------------------------
 # MAIN
@@ -166,8 +182,9 @@ case "$1" in
         stop) stop ;;
         restart) restart ;;
         status) status ;;
+        logrotate) logrotate ;;
         *)
-                echo "USAGE: `basename $0` [start|stop|status|restart]"
+                echo "USAGE: `basename $0` [start|stop|status|restart|logrotate]"
                 ;;
 esac
 

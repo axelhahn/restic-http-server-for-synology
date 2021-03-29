@@ -8,6 +8,8 @@ A set of bash scripts to
 * Service handling: start/stop/status of server
 * A user administration for access private repos handles user entries in [webroot]/.htpasswd
 
+Source: https://github.com/axelhahn/restic-http-server-for-synology
+
 ## License
 
 GNU GP 3.0
@@ -18,9 +20,9 @@ GNU GP 3.0
 
 Web based stuff:
 
-* WebLogin to your Synology with an admin user
+* Login into the web ui of your Synology with an admin user
 * Activate DDNS for your NAS
-* Activate ssl certificate for your NAS - what is using Let's Encrypt
+* Activate ssl certificate for your NAS (what is using Let's Encrypt in the background)
 
 Via SSH console:
 
@@ -59,9 +61,13 @@ rest_server.sh
 useradmin.sh
 ```
 
+The installer also creates a /usr/local/etc/rc.d/rest_server.sh - which is a softlink to rest_server.sh in your
+installation directory.
+With that link the restic http server will start automatically if your Synology nas is (re-)booting.
+
 ### see the config
 
-There is no change at this point ... but have a look:
+There is no need to change at this point ... but have a look:
 
 ```
 root@nas:/volume1/opt/restic# cat rest_server.conf
@@ -112,19 +118,63 @@ pwlength=32
 # ----------------------------------------------------------------------
 ```
 
-### create a user
+### create a user for http access
 
 The default config activates private repos (see restic http doc for description).
 In short: a user [user] gets access to [backup-url]:[port]/[user]/ only ... with its own password.
 
 Execute `./useradmin.sh add USERNAME` to create (or update) a user with a generated password (32 chars by default).
+Copy and paste the shown password in the output to your restic client config. The password visible only once.
+
+It is not possible to show the password again.
+
+But you can repeat `./useradmin.sh add USERNAME` to set a new password and update the client config.
+
 Execute `./useradmin.sh status` to see all users and their used size.
+
+```
+# ./useradmin.sh
+USAGE: useradmin.sh [status|add]
+  status        show status of current users and used disk size
+  add [user]    add a new user and password.
+                If the user exists it will update its password.
+                As 2nd parameter you can optionally add a username.
+                Without given user it will be asked for interactively.
+```
 
 ### start service
 
-Execute `./rest_server.sh start` to start server.
+`./rest_server.sh start` is our service script for start/ stop/ restart restic http and logrotation.
 
-## Status
+```
+# ./rest_server.sh
+USAGE: rest_server.sh [start|stop|status|restart|logrotate]
+```
+
+Execute `./rest_server.sh start` to start the restic http server.
+It detects if an ssl certificate was enabled and uses https if possible.
+
+Execute `./rest_server.sh status` to see the process with PID and full path and used port.
+
+### logrotation
+
+`./rest_server.sh logrotate` works only once per day and will rotate the logfile with the date as extension.
+Rotated logs older 7d will be deleted.
+
+To run the logrotation regulary:
+In the synology web ui go to the task planner and let execute a custom script daily.
+The Script to execute is
+
+`/volume1/opt/restic/rest_server.sh logrotate`
+or
+`/usr/local/etc/rc.d/rest_server.sh logrotate`
+
+In the beginning you can activate to send an email of each execution. Test the job with run now
+and then check your email inbox.
+
+TODO: put a file into `/etc/logrotate.d/`
+
+## Status of this project
 
 In short: work in progress.
 
@@ -136,11 +186,11 @@ DONE
 * configure service behaviour in a conf file
 * add/ update users for private repositories
 * autostart service on reboot
-* handle users with encrypted passwort in .htpasswd 
+* handle users with encrypted password in .htpasswd 
+* logrotation; needs a cronjob
 
 TODO
 
 * service runs as root - not as unprivileged http user
-* logrotation - currently it log into one log file ... which is just growing
 * log format - the output for a request is quite basic
 * no package ... it is a manual way so far
