@@ -7,7 +7,7 @@
 # License: GNU GPL 3.0
 # ----------------------------------------------------------------------
 # 2021-03-29  www.axelhahn.de  init ... but WIP
-# 2021-03-30  www.axelhahn.de  added logrotation ... but WIP
+# 2021-04-02  www.axelhahn.de  added logrotation
 # ======================================================================
 
 #defaults
@@ -36,22 +36,6 @@ function check_running_server(){
 
 function _addlog(){
         echo "---------- `date` $*" >>$logfile
-}
-
-
-function UNUSEDgetcommand(){
-        echo "$mybin \
-            --debug \
-                --listen $listen \
-            --append-only \
-                --no-auth \
-            --private-repos \
-                --path $dir_data \
-            --tls \
-                --tls-cert $dir_cert/fullchain.pem \
-            --tls-key $dir_cert/privkey.pem \
-                > $logfile &"
-
 }
 
 function status(){
@@ -107,6 +91,7 @@ function start(){
                 >> $logfile &
 
         # status
+        sleep 1
         check_running_server >/dev/null
         if [ $? -eq 0 ]; then
                 test -z "$param_tls" && echo "No Certificate - use [http] in your restic client"
@@ -152,9 +137,17 @@ function restart(){
 }
 
 function logrotate(){
+        local logrotation=$( grep -l $logfile /etc/logrotate.d/* | head -1 )
+        if [ ! -z "$logrotation" ]; then
+                echo "INFO: logrotation config $logrotation was detected"
+                echo "The daily logrotation will be done by system logrotate service."
+                echo "Executing logrotate -v -f $logrotation ..."
+                logrotate -v -f $logrotation
+                exit $?
+        fi
+
         local rotLog=$logfile.$( date +%Y-%m-%d )
         local keep=7
-
         ls $rotLog* >/dev/null 2>&1
         if [ $? -eq 0 ]; then
                 echo 'SKIP: rotation was already done today'
@@ -164,8 +157,10 @@ function logrotate(){
                 mv $logfile $rotLog
                 ( start )
         fi
-        echo 'Cleanup old logs'
+        echo 'Cleanup old logs ...'
         find $( dirname $logfile ) -type f -name "$( basename $logfile).*" -mtime +$keep -print -delete
+        echo 'Logfiles left:'
+        ls -l $logfile.*
 }
 
 # ------------------------------------------------------------

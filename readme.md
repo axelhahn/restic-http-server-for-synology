@@ -208,4 +208,4 @@ TODO
 
 * service runs as root - not as unprivileged http user
 * log format - the output for a request is quite basic
-* no package ... it is a manual way so far
+* no package ... it is a manual way by scripts so far
