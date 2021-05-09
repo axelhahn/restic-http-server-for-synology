@@ -149,12 +149,15 @@ Execute `./useradmin.sh status` to see all users and their used size.
 
 ```
 # ./useradmin.sh
-USAGE: useradmin.sh [status|add]
-  status        show status of current users and used disk size
-  add [user]    add a new user and password.
-                If the user exists it will update its password.
-                As 2nd parameter you can optionally add a username.
-                Without given user it will be asked for interactively.
+USAGE: useradmin.sh [status|add|delete]
+  status         Show status of current users and used disk size
+  add [user]     Add a new user and password.
+                 As 2nd parameter you can optionally add a username.
+                 Without given user it will be asked for interactively.
+                 If the user exists it will update its password.
+  delete [user]  Delete a user and all its backup data(!!!).
+                 Without given user you get the status and it will be asked
+                 for interactively.
 ```
 
 ### start service
