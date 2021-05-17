@@ -8,6 +8,7 @@
 # ----------------------------------------------------------------------
 # 2021-03-29  www.axelhahn.de  init ... but WIP
 # 2021-04-02  www.axelhahn.de  added logrotation
+# 2021-05-17  www.axelhahn.de  rename function logrotation
 # ======================================================================
 
 #defaults
@@ -136,7 +137,7 @@ function restart(){
         start
 }
 
-function logrotate(){
+function do_logrotate(){
         local logrotation=$( grep -l $logfile /etc/logrotate.d/* | head -1 )
         if [ ! -z "$logrotation" ]; then
                 echo "INFO: logrotation config $logrotation was detected"
@@ -177,7 +178,7 @@ case "$1" in
         stop) stop ;;
         restart) restart ;;
         status) status ;;
-        logrotate) logrotate ;;
+        logrotate) do_logrotate ;;
         *)
                 echo "USAGE: `basename $0` [start|stop|status|restart|logrotate]"
                 ;;
