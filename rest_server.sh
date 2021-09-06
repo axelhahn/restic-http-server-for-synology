@@ -9,6 +9,7 @@
 # 2021-03-29  www.axelhahn.de  init ... but WIP
 # 2021-04-02  www.axelhahn.de  added logrotation
 # 2021-05-17  www.axelhahn.de  rename function logrotation
+# 2021-09-08  www.axelhahn.de  update filename of LE ssl certfile for DSM7
 # ======================================================================
 
 #defaults
@@ -72,8 +73,12 @@ function start(){
         local param_noauth=''
         local param_private_repos=''
 
+		# DSM6 LE certs
         test -f $dir_cert/fullchain.pem -a -f $dir_cert/privkey.pem \
                 && param_tls="--tls --tls-cert $dir_cert/fullchain.pem --tls-key $dir_cert/privkey.pem"
+		# DSM7 LE certs
+        test -f $dir_cert/ECC-fullchain.pem -a -f $dir_cert/ECC-privkey.pem \
+                && param_tls="--tls --tls-cert $dir_cert/ECC-fullchain.pem --tls-key $dir_cert/ECC-privkey.pem"
         test -z "$param_tls" && echo "WARNING: certificate in NAS was not enabled - using unencrypted connection"
 
         test ${appendonly} -gt 0   && param_append='--append-only'
