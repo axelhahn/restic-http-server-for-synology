@@ -10,6 +10,11 @@ A set of bash scripts to
 
 Source: https://github.com/axelhahn/restic-http-server-for-synology
 
+Latest tested versions:
+
+* Restic: 0.14.0
+* on Synology DSM 7.2
+
 ## License
 
 GNU GP 3.0
@@ -39,16 +44,27 @@ Web based stuff:
 * Activate DDNS for your NAS
 * Activate ssl certificate for your NAS (what is using Let's Encrypt in the background)
 
+### Get sources
+
 Via SSH console:
 
 * Login to your Synology with an admin account
-* Make a `sudo -i` to become root
-* Create a directory, i.e. `/volume1/opt/restic`
+* Create a directory, i.e. `sudo mkdir -p /volume1/opt/restic`
 * Copy the files of the project there
+
+```shell
+cd /volume1/opt/restic
+sudo curl -O https://github.com/axelhahn/restic-http-server-for-synology/archive/refs/heads/master.tar.gz
+tar -xzf master.tar.gz
+cd restic-http-server-for-synology-master
+sudo cp * ..
+cd ..
+rm -rf restic-http-server-for-synology-master master.tar.gz
+```
 
 The result is something like that:
 
-```
+```shell
 # ls -1
 install.sh
 rest_server.conf.dist
@@ -58,7 +74,7 @@ useradmin.sh
 
 ### Install Binary and basic config
 
-Execute `./install.sh` to download the required binary and initialize the service.
+Execute `sudo ./install.sh` to download the required binary and initialize the service.
 
 The reuslt is
 
@@ -68,8 +84,8 @@ data
 install.sh
 log
 rest-server
-rest-server_0.10.0_linux_arm64
-rest-server_0.10.0_linux_arm64.tar.gz
+rest-server_0.14.0_linux_arm64
+rest-server_0.14.0_linux_arm64.tar.gz
 rest_server.conf
 rest_server.conf.dist
 rest_server.sh
@@ -148,7 +164,7 @@ But you can repeat `./useradmin.sh add USERNAME` to set a new password and updat
 Execute `./useradmin.sh status` to see all users and their used size.
 
 ```
-# ./useradmin.sh
+# sudo ./useradmin.sh
 USAGE: useradmin.sh [status|add|delete]
   status         Show status of current users and used disk size
   add [user]     Add a new user and password.
@@ -162,17 +178,17 @@ USAGE: useradmin.sh [status|add|delete]
 
 ### start service
 
-`./rest_server.sh start` is our service script for start/ stop/ restart restic http and logrotation.
+`sudo ./rest_server.sh start` is our service script for start/ stop/ restart restic http and logrotation.
 
 ```
-# ./rest_server.sh
+# sudo ./rest_server.sh
 USAGE: rest_server.sh [start|stop|status|restart|logrotate]
 ```
 
-Execute `./rest_server.sh start` to start the restic http server.
+Execute `sudo ./rest_server.sh start` to start the restic http server.
 It detects if an ssl certificate was enabled and uses https if possible.
 
-Execute `./rest_server.sh status` to see the process with PID and full path and used port.
+Execute `sudo ./rest_server.sh status` to see the process with PID and full path and used port.
 
 ### logrotation
 

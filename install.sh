@@ -8,6 +8,7 @@
 # ----------------------------------------------------------------------
 # 2021-03-29  www.axelhahn.de  init ... but WIP
 # 2021-03-31  www.axelhahn.de  create logrotate.d
+# 2025-12-26  www.axelhahn.de  fetch version from h2 node (arm64 linux compiled version is not available in html source)
 # ======================================================================
 
 
@@ -16,13 +17,15 @@
 # ------------------------------------------------------------
 
 # TODO
-# autodetect latest arm linux version
+# autodetect latest arm linux version 
 # wget -O aa.tmp https://github.com/restic/rest-server/releases/
-# cat aa.tmp | grep "rest-server_.*_linux_arm64.tar.gz"
+# cat aa.tmp | grep "rest-server_.*_linux_arm64.tar.gz" 
 
 urlResticReleases=https://github.com/restic/rest-server/releases/
 # static variant:
 # resticVersion=0.10.0
+# resticVersion=0.14.0
+resticVersion=
 
 resticLink=rest-server
 
@@ -54,7 +57,8 @@ function _getLocalVersion(){
 }
 
 function _getRemoteVersion(){
-        wget -O - $urlResticReleases 2>/dev/null | grep "href.*rest-server_.*_linux_arm64.tar.gz" | cut -f 2 -d '_'
+        # wget -O - $urlResticReleases 2>/dev/null | grep "href.*rest-server_.*_linux_arm64.tar.gz" | cut -f 2 -d '_'
+        wget -O - $urlResticReleases 2>/dev/null | grep -i "<h2.*>v[i0-9]" | head -1 | cut -f 2 -d '>' | cut -f 1 -d "<" | tr -d "v"
 }
 
 # ------------------------------------------------------------
@@ -104,6 +108,10 @@ rm -f $resticLink || true
 ln -s $resticDir $resticLink && ls -l $resticLink || _quit "Unable to create softlink $resticLink."
 
 
+_h2 "Make binary executable"
+chmod 750 $resticDir/rest-server
+ls -l $resticDir/rest-server
+
 
 _h2 "Init dirs"
 test -d log  || mkdir log  || _quit "unable to create dir [log]."
@@ -111,7 +119,7 @@ test -d data || mkdir data || _quit "unable to create dir [data]."
 ls -ld log data
 
 
-#
+# 
 # removed after writing useradmin.sh
 #
 # _h2 "Init default user and password $auth"
@@ -153,7 +161,7 @@ $(pwd )/$logfile {
   postrotate
     $autostart restart
   endscript
-}
+} 
 EOLOG
 ls -l $logrotation || _quit "unable to create logrotation file"
 # cat /etc/logrotate.d/restic_server
@@ -167,9 +175,9 @@ echo "(1)"
 echo "Have look to rest_server.conf"
 echo
 echo "(2)"
-echo "Create a user to access a private repo with useradmin.sh add [user]"
+echo "Create a user to access a private repo with 'sudo ./useradmin.sh add [user]'"
 echo
 echo "(3)"
-echo "Then start the server with ./rest_server.sh start."
+echo "Then start the server with 'sudo ./rest_server.sh start'."
 
 # ------------------------------------------------------------
