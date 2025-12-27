@@ -13,7 +13,7 @@ Source: https://github.com/axelhahn/restic-http-server-for-synology
 Latest tested versions:
 
 * Restic: 0.14.0
-* on Synology DSM 7.2
+* on Synology DSM 7.3
 
 ## License
 
@@ -36,6 +36,8 @@ the backend url of the https server.
 
 ## Installation
 
+Remark: since DSM 7.2 (?) `sudo -i` isn't allowed anymore to open a shell as root and execute all commands. All actions are written with sudo in front now.
+
 ### Prepare
 
 Web based stuff:
@@ -49,17 +51,20 @@ Web based stuff:
 Via SSH console:
 
 * Login to your Synology with an admin account
-* Create a directory, i.e. `sudo mkdir -p /volume1/opt/restic`
-* Copy the files of the project there
+* Create a directory, and get the files of the project there
 
 ```shell
+# Create directory
+sudo mkdir -p /volume1/opt/restic
 cd /volume1/opt/restic
-sudo curl -O https://github.com/axelhahn/restic-http-server-for-synology/archive/refs/heads/master.tar.gz
-tar -xzf master.tar.gz
+
+# get the sources
+sudo curl -o master.tar.gz https://codeload.github.com/axelhahn/restic-http-server-for-synology/tar.gz/refs/heads/master
+sudo tar -xzf master.tar.gz
 cd restic-http-server-for-synology-master
 sudo cp * ..
 cd ..
-rm -rf restic-http-server-for-synology-master master.tar.gz
+sudo rm -rf restic-http-server-for-synology-master master.tar.gz
 ```
 
 The result is something like that:
@@ -72,13 +77,13 @@ rest_server.sh
 useradmin.sh
 ```
 
-### Install Binary and basic config
+### Run insaller to install binary and basic config
 
 Execute `sudo ./install.sh` to download the required binary and initialize the service.
 
 The reuslt is
 
-```
+```txt
 # ls -1
 data
 install.sh
@@ -100,7 +105,7 @@ With that link the restic http server will start automatically if your Synology 
 
 There is no need to change at this point ... but have a look:
 
-```
+```shell
 root@nas:/volume1/opt/restic# cat rest_server.conf
 # ======================================================================
 #
@@ -149,7 +154,7 @@ pwlength=32
 # ----------------------------------------------------------------------
 ```
 
-### create a user for http access
+### Create a user for http access
 
 The default config activates private repos (see restic http doc for description).
 In short: a user [user] gets access to [backup-url]:[port]/[user]/ only ... with its own password.
@@ -176,7 +181,7 @@ USAGE: useradmin.sh [status|add|delete]
                  for interactively.
 ```
 
-### start service
+### Start service
 
 `sudo ./rest_server.sh start` is our service script for start/ stop/ restart restic http and logrotation.
 
@@ -190,7 +195,7 @@ It detects if an ssl certificate was enabled and uses https if possible.
 
 Execute `sudo ./rest_server.sh status` to see the process with PID and full path and used port.
 
-### logrotation
+### Logrotation
 
 The installer creates a file for restic http server in /etc/logrotate.d/.
 

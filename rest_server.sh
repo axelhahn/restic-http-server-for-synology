@@ -10,6 +10,7 @@
 # 2021-04-02  www.axelhahn.de  added logrotation
 # 2021-05-17  www.axelhahn.de  rename function logrotation
 # 2021-09-08  www.axelhahn.de  update filename of LE ssl certfile for DSM7
+# 2025-12-27  www.axelhahn.de  update status for Restic server v0.14
 # ======================================================================
 
 #defaults
@@ -21,11 +22,9 @@ typeset -i pwlength=32
 PRODUCT='RESTIC REST SERVER'
 
 
-
 # ----------------------------------------------------------------------
 # FUNCTIONS
 # ----------------------------------------------------------------------
-
 
 function UNUSEDcheck_config(){
         local typeset -i iErrors=0
@@ -45,7 +44,7 @@ function status(){
         echo "$PRODUCT STATUS:"
         echo
         echo Binary: $mybin
-        $mybin -V
+        $mybin -v 2>/dev/null || $mybin -V 2>/dev/null
         echo
         echo --- process:
         check_running_server
@@ -73,10 +72,10 @@ function start(){
         local param_noauth=''
         local param_private_repos=''
 
-		# DSM6 LE certs
+	# DSM6 LE certs
         test -f $dir_cert/fullchain.pem -a -f $dir_cert/privkey.pem \
                 && param_tls="--tls --tls-cert $dir_cert/fullchain.pem --tls-key $dir_cert/privkey.pem"
-		# DSM7 LE certs
+	# DSM7 LE certs
         test -f $dir_cert/ECC-fullchain.pem -a -f $dir_cert/ECC-privkey.pem \
                 && param_tls="--tls --tls-cert $dir_cert/ECC-fullchain.pem --tls-key $dir_cert/ECC-privkey.pem"
         test -z "$param_tls" && echo "WARNING: certificate in NAS was not enabled - using unencrypted connection"
@@ -90,9 +89,9 @@ function start(){
             --debug \
                 --listen $listen \
                 --path $dir_data \
-            $param_append \
-            $param_noauth \
-            $param_private_repos \
+                $param_append \
+                $param_noauth \
+                $param_private_repos \
                 $param_tls \
                 >> $logfile &
 
