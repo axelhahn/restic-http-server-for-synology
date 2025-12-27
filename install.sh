@@ -16,15 +16,7 @@
 # CONFIG
 # ------------------------------------------------------------
 
-# TODO
-# autodetect latest arm linux version 
-# wget -O aa.tmp https://github.com/restic/rest-server/releases/
-# cat aa.tmp | grep "rest-server_.*_linux_arm64.tar.gz" 
-
 urlResticReleases=https://github.com/restic/rest-server/releases/
-# static variant:
-# resticVersion=0.10.0
-# resticVersion=0.14.0
 resticVersion=
 
 resticLink=rest-server
@@ -32,8 +24,6 @@ resticLink=rest-server
 resticScript=rest_server.sh
 autostart=/usr/local/etc/rc.d/$resticScript
 logrotation=/etc/logrotate.d/restic_server
-
-#auth='backup:backup'
 
 
 # ------------------------------------------------------------
@@ -52,8 +42,14 @@ function _h2(){
 
 function _getLocalVersion(){
         # test -x $resticLink/rest_server && $resticLink/rest_server -V | cut -f 2 -d ' '
-        $resticLink/rest-server -V 2>/dev/null | cut -f 2 -d ' '
-        # ls -1 | grep "rest-server_[0-9].*_" | cut -f 2 -d '_' | sort -n | tail -1
+
+        # works in v0.10.0
+        # $resticLink/rest-server -V 2>/dev/null | cut -f 2 -d ' '
+
+        # works in v0.14.0
+        # $resticLink/rest-server -v 2>/dev/null | cut -f 4 -d ' '
+
+        ls -1 | grep "rest-server_[0-9].*_" | cut -f 2 -d '_' | sort -n | tail -1
 }
 
 function _getRemoteVersion(){
@@ -96,11 +92,9 @@ fi
 test -f $dlFile || _quit "Download failed."
 
 
-
 _h2 "Extract"
 tar -xzf ${dlFile} || _quit "Extraction failed."
 ls -ld $resticDir || _quit "Extraction was done ... but expected dir $resticDir does not exist. I am confused :-/"
-
 
 
 _h2 "Create Link"
