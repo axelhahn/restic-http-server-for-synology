@@ -1,6 +1,6 @@
 # Restic Http Server on Synology NAS
 
-## Description
+## 🔶 Description
 
 A set of bash scripts to 
 
@@ -8,33 +8,30 @@ A set of bash scripts to
 * Service handling: start/stop/status of server
 * A user administration for access to private repos; it handles user entries in [webroot]/.htpasswd (using openssl)
 
-Source: https://github.com/axelhahn/restic-http-server-for-synology
+📄 Source: https://github.com/axelhahn/restic-http-server-for-synology
+
+📜 License GNU GP 3.0
 
 Latest tested versions:
 
 * Restic: 0.14.0
 * on Synology DSM 7.3
 
-## License
 
-GNU GP 3.0
+## 🔷 Introduction
 
-## Introduction
-
-Restic client: https://restic.net/ - it is an opensource backup tool. 
+Restic **client**: https://restic.net/ - it is an opensource backup tool. 
 
 It is very fast and uses deduplication. Copy a single to your client binary and use it. 
 It stores backup data on (USB) disk, SFTP, S3 or other backend supported by rclone.
 
-To use https as backend there is a rest http server. https://github.com/restic/rest-server
+To use https as backend there is a **Restic server**. https://github.com/restic/rest-server
 
-If you have a Synology NAS at home then this repository helps you to install that https
-backend and maintain users.
+If you have a Synology NAS at home then this repository helps you to install that https backend and maintain users.
 
-On your Windows/ Linux/ Mac OS client you additionally need to install the client and configure
-the backend url of the https server.
+On your Windows/ Linux/ Mac OS client you additionally need to install the client and configure the backend url of the https server.
 
-## Installation
+## 🪄 Installation
 
 Remark: since DSM 7.2 (?) `sudo -i` isn't allowed anymore to open a shell as root and execute all commands. All actions are written with sudo in front now.
 
@@ -77,7 +74,7 @@ rest_server.sh
 useradmin.sh
 ```
 
-### Run insaller to install binary and basic config
+### Run installer
 
 Execute `sudo ./install.sh` to download the required binary and initialize the service.
 
@@ -101,7 +98,7 @@ The installer also creates a /usr/local/etc/rc.d/rest_server.sh - which is a sof
 installation directory.
 With that link the restic http server will start automatically if your Synology nas is (re-)booting.
 
-### see the config
+### See the config
 
 There is no need to change at this point ... but have a look:
 
@@ -216,7 +213,7 @@ or
 In the beginning you can activate to send an email of each execution. Test the job with run now
 and then check your email inbox.
 
-## Status of this project
+## 👉 Status of this project
 
 In short: work in progress.
 
