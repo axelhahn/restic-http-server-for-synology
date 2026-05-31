@@ -2,21 +2,30 @@
 # ======================================================================
 #
 # INSTALL RESTIC HTTP SERVER ON SYNOLOGY NAS
+# Supports:
+#   - ARMv7 (armv7l / armv7)
+#   - ARM64 (aarch64 / arm64)
+#   - x86_64
 #
+# Downloads prebuilt binaries from GitHub releases
+# https://github.com/restic/rest-server
 # ----------------------------------------------------------------------
 # License: GNU GPL 3.0
 # ----------------------------------------------------------------------
 # 2021-03-29  www.axelhahn.de  init ... but WIP
 # 2021-03-31  www.axelhahn.de  create logrotate.d
 # 2025-12-26  www.axelhahn.de  fetch version from h2 node (arm64 linux compiled version is not available in html source)
+# 2026-05-28  basti122303      add multi-arch support
 # ======================================================================
 
+set -e
 
 # ------------------------------------------------------------
 # CONFIG
 # ------------------------------------------------------------
 
-urlResticReleases=https://github.com/restic/rest-server/releases/
+# GitHub release base URL
+urlBase="https://github.com/restic/rest-server/releases/download"
 resticVersion=
 
 resticLink=rest-server
@@ -25,6 +34,34 @@ resticScript=rest_server.sh
 autostart=/usr/local/etc/rc.d/$resticScript
 logrotation=/etc/logrotate.d/restic_server
 
+# ---------------------------------------------------------------------
+# ERROR HANDLING
+# ---------------------------------------------------------------------
+fail() {
+    echo "ERROR: $*"
+    exit 1
+}
+
+# ---------------------------------------------------------------------
+# ARCH DETECTION
+# Maps uname -m → rest-server binary naming
+# ---------------------------------------------------------------------
+get_arch() {
+    case "$(uname -m)" in
+        x86_64)
+            echo "linux_amd64"
+            ;;
+        aarch64|arm64)
+            echo "linux_arm64"
+            ;;
+        armv7l|armv7*)
+            echo "linux_armv7"
+            ;;
+        *)
+            fail "Unsupported architecture: $(uname -m)"
+            ;;
+    esac
+}
 
 # ------------------------------------------------------------
 # FUNCTIONS
@@ -52,9 +89,15 @@ function _getLocalVersion(){
         ls -1 | grep "rest-server_[0-9].*_" | cut -f 2 -d '_' | sort -n | tail -1
 }
 
-function _getRemoteVersion(){
-        # wget -O - $urlResticReleases 2>/dev/null | grep "href.*rest-server_.*_linux_arm64.tar.gz" | cut -f 2 -d '_'
-        wget -O - $urlResticReleases 2>/dev/null | grep -i "<h2.*>v[i0-9]" | head -1 | cut -f 2 -d '>' | cut -f 1 -d "<" | tr -d "v"
+# ---------------------------------------------------------------------
+# GET LATEST VERSION FROM GITHUB
+# (simple HTML scrape, no API dependency)
+# ---------------------------------------------------------------------
+function _getRemoteVersion() {
+	curl -s https://api.github.com/repos/restic/rest-server/releases/latest |
+    grep '"tag_name"' |
+    cut -d '"' -f4 |
+    sed 's/^v//'
 }
 
 # ------------------------------------------------------------
@@ -66,7 +109,9 @@ echo "========== INSTALL RESTIC SERVER =========="
 echo
 cd $( dirname $0 ) || _quit "cannot change directory ..."
 
-uname -m | grep "arch64" >/dev/null || _quit "Sorry installer is for arch64 Synolgy NAS"
+# Detect CPU architecture
+arch=$(get_arch)
+echo "[INFO] architecture: $arch"
 
 localversion=$( _getLocalVersion )
 echo local version : $localversion
@@ -74,13 +119,14 @@ echo -n 'remote version: '
 resticVersion=$( _getRemoteVersion )
 echo $resticVersion
 
-test -z "$resticVersion" && _quit "Unable to detect remote version from $urlResticReleases"
+test -z "$resticVersion" && _quit "Unable to detect remote version from $urlBase"
 
 test "$remoteVersion" = "$localversion" && echo "equal"
-urlRestic=https://github.com/restic/rest-server/releases/download/v${resticVersion}/rest-server_${resticVersion}_linux_arm64.tar.gz
+urlRestic="${urlBase}/v${resticVersion}/rest-server_${resticVersion}_${arch}.tar.gz"
 dlFile=$( basename $urlRestic )
-resticDir=rest-server_${resticVersion}_linux_arm64
+resticDir=rest-server_${resticVersion}_${arch}
 
+echo "[INFO] download URL: $url"
 
 _h2 "Download"
 if [ -f $dlFile ]; then
