@@ -212,6 +212,25 @@ or
 In the beginning you can activate to send an email of each execution. Test the job with run now
 and then check your email inbox.
 
+### Update
+
+Udate scripts:
+
+* execute steps im "Get sources" to download the current version from Github
+
+Upgrade restic rest server.
+
+* Execute `sudo ./install.sh` to download the latest binary 
+
+After update/ upgrade:
+
+* run `sudo ./rest_server.sh restart` to restart the restic rest service
+
+If a new Restic rest version was found then delete 
+
+* folder `rest-server_<old-version>*`
+* file `rest-server_<old-version>*.tgz`
+
 ## 👉 Status of this project
 
 In short: work in progress.
