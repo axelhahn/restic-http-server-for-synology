@@ -104,9 +104,20 @@ function _getRemoteVersion() {
 # MAIN
 # ------------------------------------------------------------
 
-echo
-echo "========== INSTALL RESTIC SERVER =========="
-echo
+# https://patorjk.com/software/taag/#p=display&f=Small+Block&t=Synology+-+Restic+Server&x=none&v=4&h=4&w=80&we=false
+echo "
+▞▀▖         ▜               ▛▀▖      ▐  ▗     ▞▀▖               
+▚▄ ▌ ▌▛▀▖▞▀▖▐ ▞▀▖▞▀▌▌ ▌ ▄▄▖ ▙▄▘▞▀▖▞▀▘▜▀ ▄ ▞▀▖ ▚▄ ▞▀▖▙▀▖▌ ▌▞▀▖▙▀▖
+▖ ▌▚▄▌▌ ▌▌ ▌▐ ▌ ▌▚▄▌▚▄▌     ▌▚ ▛▀ ▝▀▖▐ ▖▐ ▌ ▖ ▖ ▌▛▀ ▌  ▐▐ ▛▀ ▌  
+▝▀ ▗▄▘▘ ▘▝▀  ▘▝▀ ▗▄▘▗▄▘     ▘ ▘▝▀▘▀▀  ▀ ▀▘▝▀  ▝▀ ▝▀▘▘   ▘ ▝▀▘▘  
+
+📄 Source: https://github.com/axelhahn/restic-http-server-for-synology
+📜 License GNU GPL 3.0
+
+
+    INSTALLER
+
+"
 cd $( dirname $0 ) || _quit "cannot change directory ..."
 
 # Detect CPU architecture
@@ -114,19 +125,25 @@ arch=$(get_arch)
 echo "[INFO] architecture: $arch"
 
 localversion=$( _getLocalVersion )
-echo local version : $localversion
-echo -n 'remote version: '
 resticVersion=$( _getRemoteVersion )
-echo $resticVersion
+echo "
+[INFO] local version : $localversion
+[INFO] remote version: $resticVersion"
 
 test -z "$resticVersion" && _quit "Unable to detect remote version from $urlBase"
 
-test "$remoteVersion" = "$localversion" && echo "equal"
+if [ "$resticVersion" = "$localversion" ]; then
+    echo "       --> Versions are equal"
+else 
+    echo "       --> Installation or update is needed"
+fi
+echo
+
 urlRestic="${urlBase}/v${resticVersion}/rest-server_${resticVersion}_${arch}.tar.gz"
 dlFile=$( basename $urlRestic )
 resticDir=rest-server_${resticVersion}_${arch}
 
-echo "[INFO] download URL: $url"
+echo "[INFO] download URL: $urlRestic"
 
 _h2 "Download"
 if [ -f $dlFile ]; then
@@ -138,7 +155,7 @@ fi
 test -f $dlFile || _quit "Download failed."
 
 
-_h2 "Extract"
+_h2 "Extract ${dlFile}"
 tar -xzf ${dlFile} || _quit "Extraction failed."
 ls -ld $resticDir || _quit "Extraction was done ... but expected dir $resticDir does not exist. I am confused :-/"
 
@@ -178,7 +195,8 @@ ls -l "$( pwd )/rest_server.conf" || _quit "Unable to create rest_server.conf (c
 
 _h2 "Enable autostart"
 sudo echo "$( pwd )/$resticScript \$*" >$autostart && sudo chmod 755 $autostart \
-        || echo "WARNING: unable to create autostart $autostart ... it requires root permissions"
+        || _quit "Unable to create autostart $autostart ... it requires root permissions"
+
 echo "INFO: file $autostart was created ... with content"
 cat $autostart
 
@@ -207,17 +225,19 @@ ls -l $logrotation || _quit "unable to create logrotation file"
 # cat /etc/logrotate.d/restic_server
 
 
-echo
-echo
-echo "========== INSTALLATION SUCCESSFUL! =========="
-echo
-echo "(1)"
-echo "Have look to rest_server.conf"
-echo
-echo "(2)"
-echo "Create a user to access a private repo with 'sudo ./useradmin.sh add [user]'"
-echo
-echo "(3)"
-echo "Then start the server with 'sudo ./rest_server.sh start'."
+echo "
+
+========== INSTALLATION SUCCESSFUL! ==========
+
+(1)
+Have a look to the file 'rest_server.conf'.
+
+(2)
+Create a user to access a private repo with 'sudo ./useradmin.sh add [user]'
+
+(3)
+Then start the server with 'sudo ./rest_server.sh start'.
+
+"
 
 # ------------------------------------------------------------

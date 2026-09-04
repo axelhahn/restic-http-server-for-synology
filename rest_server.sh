@@ -45,7 +45,7 @@ function status(){
         echo
         echo Binary: $mybin
         $mybin -v 2>/dev/null || $mybin -V 2>/dev/null
-        echo
+
         echo --- process:
         check_running_server
         if [ $? -ne 0 ]; then
