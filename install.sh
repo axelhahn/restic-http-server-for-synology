@@ -104,8 +104,19 @@ function _getRemoteVersion() {
 # MAIN
 # ------------------------------------------------------------
 
+# https://patorjk.com/software/taag/#p=display&f=Small+Block&t=Synology+-+Restic+Server&x=none&v=4&h=4&w=80&we=false
 echo "
-========== INSTALL RESTIC SERVER ==========
+▞▀▖         ▜               ▛▀▖      ▐  ▗     ▞▀▖               
+▚▄ ▌ ▌▛▀▖▞▀▖▐ ▞▀▖▞▀▌▌ ▌ ▄▄▖ ▙▄▘▞▀▖▞▀▘▜▀ ▄ ▞▀▖ ▚▄ ▞▀▖▙▀▖▌ ▌▞▀▖▙▀▖
+▖ ▌▚▄▌▌ ▌▌ ▌▐ ▌ ▌▚▄▌▚▄▌     ▌▚ ▛▀ ▝▀▖▐ ▖▐ ▌ ▖ ▖ ▌▛▀ ▌  ▐▐ ▛▀ ▌  
+▝▀ ▗▄▘▘ ▘▝▀  ▘▝▀ ▗▄▘▗▄▘     ▘ ▘▝▀▘▀▀  ▀ ▀▘▝▀  ▝▀ ▝▀▘▘   ▘ ▝▀▘▘  
+
+📄 Source: https://github.com/axelhahn/restic-http-server-for-synology
+📜 License GNU GPL 3.0
+
+
+    INSTALLER
+
 "
 cd $( dirname $0 ) || _quit "cannot change directory ..."
 

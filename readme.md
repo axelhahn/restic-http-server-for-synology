@@ -8,9 +8,8 @@ A set of bash scripts to
 * Service handling: start/stop/status of server
 * A user administration for access to private repos; it handles user entries in [webroot]/.htpasswd (using openssl)
 
-📄 Source: https://github.com/axelhahn/restic-http-server-for-synology
-
-📜 License GNU GP 3.0
+📄 Source: https://github.com/axelhahn/restic-http-server-for-synology \
+📜 License GNU GPL 3.0
 
 Latest tested versions:
 

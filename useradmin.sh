@@ -35,7 +35,6 @@ function _encrypt_apr1(){
 
 function add(){
         local myuser=$1
-        echo
         echo 'ADD (or update) user'
         echo
         if [ -z "$myuser" ]; then
@@ -87,7 +86,6 @@ function add(){
 }
 function delete(){
         local myuser=$1
-        echo
         echo 'DELETE user'
         echo
         if [ -z "$myuser" ]; then
@@ -105,25 +103,30 @@ function delete(){
                 echo "ERROR: user [$myuser] does not exist in ${htfile}. Use parameter status to get a list of existing users."
                 exit 1
         fi
+        echo
 
         echo '--- deleting backup data:'
         test -d "$dir_data/$myuser" || echo 'SKIP: no backup data were found'
         test -d "$dir_data/$myuser" && echo "deleting $dir_data/$myuser" && rm -rf "$dir_data/$myuser"
         echo
         echo "--- removing user ${myuser} from ${htfile}"
-        cat "${htfile}" 2>/dev/null | grep -v "^${myuser}:" >"${htfile}.tmp" && mv "${htfile}.tmp" "${htfile}" || exit 1
+        cat "${htfile}" 2>/dev/null | grep -v "^${myuser}:" >"${htfile}.tmp"
+        mv "${htfile}.tmp" "${htfile}" || exit 1
         echo 'OK.'
         echo
 
 }
 function status(){
-        echo
         echo STATUS
         echo
         local tbl='%-10s %-40s %s'
         local tblline='--------------------------------------------------------------------------------'
         echo '--- htpasswd file:'
-        ls -l $htfile
+        if ! ls -l $htfile 2>/dev/null; then
+                echo "ERROR: The htpasswd file $htfile does not exist yet."
+                echo "Run command 'add' to create a first user."
+                exit 1
+        fi
         echo
 
         typeset -i local iUsers=$( cat ${htfile} | grep "^[a-zA-Z]" | wc -l )
@@ -141,6 +144,9 @@ function status(){
                         printf "$tbl\n" $myuser $pwhash "$mysize"
                 done
                 echo $tblline
+        else
+                echo "No users found in $htfile"
+                echo "Run command 'add' to create a first user."
         fi
 }
 
@@ -152,6 +158,20 @@ cd `dirname $0`
 . rest_server.conf
 htfile=$dir_data/.htpasswd
 
+# https://patorjk.com/software/taag/#p=display&f=Small+Block&t=Synology+-+Restic+Server&x=none&v=4&h=4&w=80&we=false
+echo "
+▞▀▖         ▜               ▛▀▖      ▐  ▗     ▞▀▖               
+▚▄ ▌ ▌▛▀▖▞▀▖▐ ▞▀▖▞▀▌▌ ▌ ▄▄▖ ▙▄▘▞▀▖▞▀▘▜▀ ▄ ▞▀▖ ▚▄ ▞▀▖▙▀▖▌ ▌▞▀▖▙▀▖
+▖ ▌▚▄▌▌ ▌▌ ▌▐ ▌ ▌▚▄▌▚▄▌     ▌▚ ▛▀ ▝▀▖▐ ▖▐ ▌ ▖ ▖ ▌▛▀ ▌  ▐▐ ▛▀ ▌  
+▝▀ ▗▄▘▘ ▘▝▀  ▘▝▀ ▗▄▘▗▄▘     ▘ ▘▝▀▘▀▀  ▀ ▀▘▝▀  ▝▀ ▝▀▘▘   ▘ ▝▀▘▘  
+
+📄 Source: https://github.com/axelhahn/restic-http-server-for-synology
+📜 License GNU GPL 3.0
+
+
+        USER ADMIN
+
+"
 
 test $privaterepos -eq 0 && echo 'WARNING: private repos are disabled in rest_server.conf.'
 test $noauth -ne 0       || echo 'WARNING: authentication is disabled in rest_server.conf.'
@@ -161,7 +181,10 @@ case "$1" in
         delete) delete $2 ;;
         status) status ;;
         *)
-                echo "USAGE: `basename $0` [status|add|delete]"
+                echo "USAGE: `basename $0` ACTION [username]"
+                echo
+                echo "ACTIONS:"
+                echo
                 echo '  status         Show status of current users and used disk size'
                 echo '  add [user]     Add a new user and password.'
                 echo '                 As 2nd parameter you can optionally add a username.'
