@@ -212,7 +212,7 @@ or
 In the beginning you can activate to send an email of each execution. Test the job with run now
 and then check your email inbox.
 
-### Update
+## 🔁 Update
 
 Udate scripts:
 
