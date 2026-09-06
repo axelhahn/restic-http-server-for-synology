@@ -164,39 +164,7 @@ But you can repeat `./useradmin.sh add USERNAME` to set a new password and updat
 
 Execute `./useradmin.sh status` to see all users and their used size.
 
-```
-# sudo ./useradmin.sh
- ./useradmin.sh help
-
-   ▞▀▖         ▜               ▛▀▖      ▐  ▗     ▞▀▖               
-   ▚▄ ▌ ▌▛▀▖▞▀▖▐ ▞▀▖▞▀▌▌ ▌ ▄▄▖ ▙▄▘▞▀▖▞▀▘▜▀ ▄ ▞▀▖ ▚▄ ▞▀▖▙▀▖▌ ▌▞▀▖▙▀▖
-   ▖ ▌▚▄▌▌ ▌▌ ▌▐ ▌ ▌▚▄▌▚▄▌     ▌▚ ▛▀ ▝▀▖▐ ▖▐ ▌ ▖ ▖ ▌▛▀ ▌  ▐▐ ▛▀ ▌  
-   ▝▀ ▗▄▘▘ ▘▝▀  ▘▝▀ ▗▄▘▗▄▘     ▘ ▘▝▀▘▀▀  ▀ ▀▘▝▀  ▝▀ ▝▀▘▘   ▘ ▝▀▘▘  
-
-📄 Source: https://github.com/axelhahn/restic-http-server-for-synology
-📜 License GNU GPL 3.0
-
-
-        USER ADMIN
-
-
-USAGE: useradmin.sh ACTION [user]
-
-ACTIONS:
-
-  status         Show status of current users and used disk size
-  add [user]     Add a new user and password.
-                 As 2nd parameter you can optionally add a username.
-                 Without given user it will be asked for interactively.
-                 If the user exists it will abort.
-  update [user]  Update the password for an existing user.
-                 As 2nd parameter you can optionally add a username.
-                 Without given user it will be asked for interactively.
-                 If the user does not exist it will abort.
-  delete [user]  Delete a user and all its backup data(!!!).
-                 Without given user you get the status and it will be asked
-                 for interactively.
-```
+![Help of user admin](docs/images/useradmin_help.png)
 
 ### Start service
 
