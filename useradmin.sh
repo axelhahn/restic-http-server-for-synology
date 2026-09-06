@@ -35,7 +35,45 @@ function _encrypt_apr1(){
 
 function add(){
         local myuser=$1
-        echo 'ADD (or update) user'
+        echo "ADD user '$myuser'"
+        echo
+        if [ -z "$myuser" ]; then
+                echo -n 'Username: '
+                read myuser
+                if [ -z "$myuser" ]; then
+                        echo "Abort."
+                        exit 1
+                fi
+        fi
+
+        cat "${htfile}" 2>/dev/null | grep "^${myuser}:" >/dev/null
+        if [ $? -eq 0 ]; then
+                echo "❌ ERROR: User already exists"
+                exit 1
+        fi
+        echo 'Creating new user ...'
+
+        mypw=$( _generate_password )
+        mycrpyted=$( _encrypt_apr1 "${mypw}")
+
+        cat "${htfile}" 2>/dev/null | grep -v "^${myuser}:" >"${htfile}.tmp"
+        echo ${myuser}:${mycrpyted} >> ${htfile}.tmp \
+                &&  sort "${htfile}.tmp" > "${htfile}"
+
+        if [ ! -f "${htfile}" ]; then
+                echo "❌ ERROR: unable to create ${htfile}. Abort."
+                exit 1
+        fi
+        echo
+        echo "✅ OK."
+
+        pwhint
+
+}
+
+function update(){
+        local myuser=$1
+        echo "UPDATE password for user '$myuser'"
         echo
         if [ -z "$myuser" ]; then
                 echo -n 'Username: '
@@ -48,45 +86,50 @@ function add(){
 
         cat "${htfile}" 2>/dev/null | grep "^${myuser}:" >/dev/null
         if [ $? -ne 0 ]; then
-                echo 'Creating new user ...'
-        else
-                echo 'Updating password of existing user ...'
+                echo "❌ ERROR: User does not exist: '${myuser}'"
+                exit 1
         fi
+        echo "Setting a new password ..."
 
         mypw=$( _generate_password )
         mycrpyted=$( _encrypt_apr1 "${mypw}")
-
 
         cat "${htfile}" 2>/dev/null | grep -v "^${myuser}:" >"${htfile}.tmp"
         echo ${myuser}:${mycrpyted} >> ${htfile}.tmp \
                 &&  sort "${htfile}.tmp" > "${htfile}"
 
         if [ ! -f "${htfile}" ]; then
-                echo "ERROR: unable to create ${htfile}. Abort."
+                echo "❌ ERROR: unable to create ${htfile}. Abort."
                 exit 1
         fi
-        echo "OK."
         echo
+        echo "✅ OK."
+        pwhint
+}
+
+function pwhint(){
         echo
-        echo "(1)"
-        echo "Restart rest server to re-read user data."
-        echo "./rest_server.sh restart"
+        echo "    (1)"
+        echo "    Restart Restic rest server to re-read user data."
+        echo "        ./rest_server.sh restart"
         echo
-        echo "(2)"
-        echo "The generated password is: $mypw"
-        echo "You cannot restore the password anymore - only set a new one."
-        echo "Copy and paste password data from screen. Now!"
+        echo "    (2)"
+        echo "    The generated password is:"
+        echo "        $mypw"
         echo
-        echo "For user [${myuser}] set the environment variable RESTIC_REPOSITORY."
+        echo "    You cannot restore the password anymore - only set a new one."
+        echo "    Copy and paste password data from screen. Now!"
         echo
-        echo "In a Bourne Shell, Bash:"
-        echo "  export RESTIC_REPOSITORY=rest:https://${myuser}:$mypw@[SYONOLOGY]:8000/${myuser}/"
-        echo "In other shells or Windows Batch use [set] instead of [export]."
+        echo "    For user '${myuser}' set the environment variable RESTIC_REPOSITORY."
+        echo
+        echo "    In a Bourne Shell, Bash:"
+        echo "      export RESTIC_REPOSITORY=rest:https://${myuser}:$mypw@[SYONOLOGY]:8000/${myuser}/"
+        echo "    In other shells or Windows Batch use 'set' instead of 'export'."
         echo
 }
 function delete(){
         local myuser=$1
-        echo 'DELETE user'
+        echo "DELETE user '${myuser}'"
         echo
         if [ -z "$myuser" ]; then
                 status
@@ -100,7 +143,7 @@ function delete(){
         fi
         cat "${htfile}" 2>/dev/null | grep "^${myuser}:" >/dev/null
         if [ $? -ne 0 ]; then
-                echo "ERROR: user [$myuser] does not exist in ${htfile}. Use parameter status to get a list of existing users."
+                echo "❌ ERROR: user '$myuser' does not exist in ${htfile}. Use parameter 'status' to get a list of existing users."
                 exit 1
         fi
         echo
@@ -109,10 +152,11 @@ function delete(){
         test -d "$dir_data/$myuser" || echo 'SKIP: no backup data were found'
         test -d "$dir_data/$myuser" && echo "deleting $dir_data/$myuser" && rm -rf "$dir_data/$myuser"
         echo
-        echo "--- removing user ${myuser} from ${htfile}"
+        echo "--- removing user '${myuser}' from ${htfile}"
         cat "${htfile}" 2>/dev/null | grep -v "^${myuser}:" >"${htfile}.tmp"
         mv "${htfile}.tmp" "${htfile}" || exit 1
-        echo 'OK.'
+        echo
+        echo '✅ OK.'
         echo
 
 }
@@ -133,7 +177,7 @@ function status(){
         echo "Users: $iUsers"
         if [ $iUsers -gt 0 ]; then
                 echo
-                printf "$tbl\n" 'User' 'password' 'used space'
+                printf "$tbl\n" 'User' 'password hash' 'used space'
                 echo $tblline
                 for myline in  $( cat ${htfile} | grep "^[a-zA-Z]" )
                 do
@@ -160,10 +204,10 @@ htfile=$dir_data/.htpasswd
 
 # https://patorjk.com/software/taag/#p=display&f=Small+Block&t=Synology+-+Restic+Server&x=none&v=4&h=4&w=80&we=false
 echo "
-▞▀▖         ▜               ▛▀▖      ▐  ▗     ▞▀▖               
-▚▄ ▌ ▌▛▀▖▞▀▖▐ ▞▀▖▞▀▌▌ ▌ ▄▄▖ ▙▄▘▞▀▖▞▀▘▜▀ ▄ ▞▀▖ ▚▄ ▞▀▖▙▀▖▌ ▌▞▀▖▙▀▖
-▖ ▌▚▄▌▌ ▌▌ ▌▐ ▌ ▌▚▄▌▚▄▌     ▌▚ ▛▀ ▝▀▖▐ ▖▐ ▌ ▖ ▖ ▌▛▀ ▌  ▐▐ ▛▀ ▌  
-▝▀ ▗▄▘▘ ▘▝▀  ▘▝▀ ▗▄▘▗▄▘     ▘ ▘▝▀▘▀▀  ▀ ▀▘▝▀  ▝▀ ▝▀▘▘   ▘ ▝▀▘▘  
+   ▞▀▖         ▜               ▛▀▖      ▐  ▗     ▞▀▖               
+   ▚▄ ▌ ▌▛▀▖▞▀▖▐ ▞▀▖▞▀▌▌ ▌ ▄▄▖ ▙▄▘▞▀▖▞▀▘▜▀ ▄ ▞▀▖ ▚▄ ▞▀▖▙▀▖▌ ▌▞▀▖▙▀▖
+   ▖ ▌▚▄▌▌ ▌▌ ▌▐ ▌ ▌▚▄▌▚▄▌     ▌▚ ▛▀ ▝▀▖▐ ▖▐ ▌ ▖ ▖ ▌▛▀ ▌  ▐▐ ▛▀ ▌  
+   ▝▀ ▗▄▘▘ ▘▝▀  ▘▝▀ ▗▄▘▗▄▘     ▘ ▘▝▀▘▀▀  ▀ ▀▘▝▀  ▝▀ ▝▀▘▘   ▘ ▝▀▘▘  
 
 📄 Source: https://github.com/axelhahn/restic-http-server-for-synology
 📜 License GNU GPL 3.0
@@ -178,10 +222,11 @@ test $noauth -ne 0       || echo 'WARNING: authentication is disabled in rest_se
 
 case "$1" in
         add) add $2 ;;
+        update) update $2 ;;
         delete) delete $2 ;;
         status) status ;;
         *)
-                echo "USAGE: `basename $0` ACTION [username]"
+                echo "USAGE: `basename $0` ACTION [user]"
                 echo
                 echo "ACTIONS:"
                 echo
@@ -189,7 +234,11 @@ case "$1" in
                 echo '  add [user]     Add a new user and password.'
                 echo '                 As 2nd parameter you can optionally add a username.'
                 echo '                 Without given user it will be asked for interactively.'
-                echo '                 If the user exists it will update its password.'
+                echo '                 If the user exists it will abort.'
+                echo '  update [user]  Update the password for an existing user.'
+                echo '                 As 2nd parameter you can optionally add a username.'
+                echo '                 Without given user it will be asked for interactively.'
+                echo '                 If the user does not exist it will abort.'
                 echo '  delete [user]  Delete a user and all its backup data(!!!).'
                 echo '                 Without given user you get the status and it will be asked'
                 echo '                 for interactively.'

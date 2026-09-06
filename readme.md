@@ -16,7 +16,6 @@ Latest tested versions:
 * Restic: 0.14.0
 * on Synology DSM 7.3
 
-
 ## 🔷 Introduction
 
 Restic **client**: https://restic.net/ - it is an opensource backup tool. 
@@ -75,7 +74,9 @@ useradmin.sh
 
 ### Run installer
 
-Execute `sudo ./install.sh` to download the required binary and initialize the service.
+Execute `sudo ./install.sh` to download the latest version of the required single binary of restic rest server and initialize the service.
+
+![Start fresh installation](docs/images/install_start.png)
 
 The reuslt is
 
@@ -93,8 +94,7 @@ rest_server.sh
 useradmin.sh
 ```
 
-The installer also creates a /usr/local/etc/rc.d/rest_server.sh - which is a softlink to rest_server.sh in your
-installation directory.
+The installer also creates a /usr/local/etc/rc.d/rest_server.sh - which is a softlink to rest_server.sh in your installation directory.
 With that link the restic http server will start automatically if your Synology nas is (re-)booting.
 
 ### See the config
@@ -166,12 +166,33 @@ Execute `./useradmin.sh status` to see all users and their used size.
 
 ```
 # sudo ./useradmin.sh
-USAGE: useradmin.sh [status|add|delete]
+ ./useradmin.sh help
+
+   ▞▀▖         ▜               ▛▀▖      ▐  ▗     ▞▀▖               
+   ▚▄ ▌ ▌▛▀▖▞▀▖▐ ▞▀▖▞▀▌▌ ▌ ▄▄▖ ▙▄▘▞▀▖▞▀▘▜▀ ▄ ▞▀▖ ▚▄ ▞▀▖▙▀▖▌ ▌▞▀▖▙▀▖
+   ▖ ▌▚▄▌▌ ▌▌ ▌▐ ▌ ▌▚▄▌▚▄▌     ▌▚ ▛▀ ▝▀▖▐ ▖▐ ▌ ▖ ▖ ▌▛▀ ▌  ▐▐ ▛▀ ▌  
+   ▝▀ ▗▄▘▘ ▘▝▀  ▘▝▀ ▗▄▘▗▄▘     ▘ ▘▝▀▘▀▀  ▀ ▀▘▝▀  ▝▀ ▝▀▘▘   ▘ ▝▀▘▘  
+
+📄 Source: https://github.com/axelhahn/restic-http-server-for-synology
+📜 License GNU GPL 3.0
+
+
+        USER ADMIN
+
+
+USAGE: useradmin.sh ACTION [user]
+
+ACTIONS:
+
   status         Show status of current users and used disk size
   add [user]     Add a new user and password.
                  As 2nd parameter you can optionally add a username.
                  Without given user it will be asked for interactively.
-                 If the user exists it will update its password.
+                 If the user exists it will abort.
+  update [user]  Update the password for an existing user.
+                 As 2nd parameter you can optionally add a username.
+                 Without given user it will be asked for interactively.
+                 If the user does not exist it will abort.
   delete [user]  Delete a user and all its backup data(!!!).
                  Without given user you get the status and it will be asked
                  for interactively.
