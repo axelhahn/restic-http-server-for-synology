@@ -57,7 +57,7 @@ cd /volume1/opt/restic
 sudo curl -o master.tar.gz https://codeload.github.com/axelhahn/restic-http-server-for-synology/tar.gz/refs/heads/master
 sudo tar -xzf master.tar.gz
 cd restic-http-server-for-synology-master
-sudo cp * ..
+sudo cp -rp * ..
 cd ..
 sudo rm -rf restic-http-server-for-synology-master master.tar.gz
 ```
