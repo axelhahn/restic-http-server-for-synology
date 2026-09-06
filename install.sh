@@ -34,47 +34,20 @@ resticScript=rest_server.sh
 autostart=/usr/local/etc/rc.d/$resticScript
 logrotation=/etc/logrotate.d/restic_server
 
-# ---------------------------------------------------------------------
-# ERROR HANDLING
-# ---------------------------------------------------------------------
-fail() {
-    echo "ERROR: $*"
-    exit 1
-}
-
-# ---------------------------------------------------------------------
-# ARCH DETECTION
-# Maps uname -m → rest-server binary naming
-# ---------------------------------------------------------------------
-get_arch() {
-    case "$(uname -m)" in
-        x86_64)
-            echo "linux_amd64"
-            ;;
-        aarch64|arm64)
-            echo "linux_arm64"
-            ;;
-        armv7l|armv7*)
-            echo "linux_armv7"
-            ;;
-        *)
-            fail "Unsupported architecture: $(uname -m)"
-            ;;
-    esac
-}
-
 # ------------------------------------------------------------
 # FUNCTIONS
 # ------------------------------------------------------------
 
 function _quit(){
-        echo CRITICAL ERROR: $*
+        echo "❌ CRITICAL ERROR: $*"
         exit 1
 }
 
 function _h2(){
         echo
-        echo "--- $*"
+        echo
+        echo "_____/  $*"
+        echo
 }
 
 function _getLocalVersion(){
@@ -100,17 +73,39 @@ function _getRemoteVersion() {
     sed 's/^v//'
 }
 
+# ---------------------------------------------------------------------
+# ARCH DETECTION
+# Maps uname -m → rest-server binary naming
+# ---------------------------------------------------------------------
+get_arch() {
+    case "$(uname -m)" in
+        x86_64)
+            echo "linux_amd64"
+            ;;
+        aarch64|arm64)
+            echo "linux_arm64"
+            ;;
+        armv7l|armv7*)
+            echo "linux_armv7"
+            ;;
+        *)
+            _quit "Unsupported architecture: $(uname -m)"
+            ;;
+    esac
+}
+
+
 # ------------------------------------------------------------
 # MAIN
 # ------------------------------------------------------------
 
 # https://patorjk.com/software/taag/#p=display&f=Small+Block&t=Synology+-+Restic+Server&x=none&v=4&h=4&w=80&we=false
 echo "
-▞▀▖         ▜               ▛▀▖      ▐  ▗     ▞▀▖               
-▚▄ ▌ ▌▛▀▖▞▀▖▐ ▞▀▖▞▀▌▌ ▌ ▄▄▖ ▙▄▘▞▀▖▞▀▘▜▀ ▄ ▞▀▖ ▚▄ ▞▀▖▙▀▖▌ ▌▞▀▖▙▀▖
-▖ ▌▚▄▌▌ ▌▌ ▌▐ ▌ ▌▚▄▌▚▄▌     ▌▚ ▛▀ ▝▀▖▐ ▖▐ ▌ ▖ ▖ ▌▛▀ ▌  ▐▐ ▛▀ ▌  
-▝▀ ▗▄▘▘ ▘▝▀  ▘▝▀ ▗▄▘▗▄▘     ▘ ▘▝▀▘▀▀  ▀ ▀▘▝▀  ▝▀ ▝▀▘▘   ▘ ▝▀▘▘  
-
+   ▞▀▖         ▜               ▛▀▖      ▐  ▗     ▞▀▖               
+   ▚▄ ▌ ▌▛▀▖▞▀▖▐ ▞▀▖▞▀▌▌ ▌ ▄▄▖ ▙▄▘▞▀▖▞▀▘▜▀ ▄ ▞▀▖ ▚▄ ▞▀▖▙▀▖▌ ▌▞▀▖▙▀▖
+   ▖ ▌▚▄▌▌ ▌▌ ▌▐ ▌ ▌▚▄▌▚▄▌     ▌▚ ▛▀ ▝▀▖▐ ▖▐ ▌ ▖ ▖ ▌▛▀ ▌  ▐▐ ▛▀ ▌  
+   ▝▀ ▗▄▘▘ ▘▝▀  ▘▝▀ ▗▄▘▗▄▘     ▘ ▘▝▀▘▀▀  ▀ ▀▘▝▀  ▝▀ ▝▀▘▘   ▘ ▝▀▘▘  
+   
 📄 Source: https://github.com/axelhahn/restic-http-server-for-synology
 📜 License GNU GPL 3.0
 
@@ -124,28 +119,43 @@ cd $( dirname $0 ) || _quit "cannot change directory ..."
 arch=$(get_arch)
 echo "[INFO] architecture: $arch"
 
-localversion=$( _getLocalVersion )
 resticVersion=$( _getRemoteVersion )
+localversion=$( _getLocalVersion )
 echo "
-[INFO] local version : $localversion
-[INFO] remote version: $resticVersion"
+[INFO] remote version: $resticVersion
+[INFO] local version : $localversion"
 
 test -z "$resticVersion" && _quit "Unable to detect remote version from $urlBase"
 
-if [ "$resticVersion" = "$localversion" ]; then
-    echo "       --> Versions are equal"
+if [ -z "$localversion" ]; then
+    echo "
+    
+    WELCOME
+
+    This installer brings up the Restic rest server on your Synology NAS. 
+
+    It will download the latest version of the rest-server binary and install 
+    it in the current directory.
+
+    Needed working directories will be created.
+    
+    Autostart of Restic rest service will be enabled.
+"
+elif [ "$resticVersion" = "$localversion" ]; then
+    echo "       --> Versions are equal - reinstalling current version"
 else 
-    echo "       --> Installation or update is needed"
+    echo "       --> Update was found"
 fi
 echo
+echo -n "Press ENTER to continue or Ctrl + C to abort ... "; read dummy
 
 urlRestic="${urlBase}/v${resticVersion}/rest-server_${resticVersion}_${arch}.tar.gz"
 dlFile=$( basename $urlRestic )
 resticDir=rest-server_${resticVersion}_${arch}
 
-echo "[INFO] download URL: $urlRestic"
 
 _h2 "Download"
+echo "[INFO] download URL: $urlRestic"
 if [ -f $dlFile ]; then
         echo "SKIP download"
 else
@@ -238,6 +248,10 @@ Create a user to access a private repo with 'sudo ./useradmin.sh add [user]'
 (3)
 Then start the server with 'sudo ./rest_server.sh start'.
 
+You can repeat the install.sh script to update the rest-server binary 
+to the latest version.
+
+Have a nice day!
 "
 
 # ------------------------------------------------------------
