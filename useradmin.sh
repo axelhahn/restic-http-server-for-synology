@@ -226,12 +226,13 @@ echo "
         USER ADMIN
 "
 
-test $privaterepos -eq 0 && (
+test "$privaterepos" = "0" && (
         echo "⚠️ WARNING: private repos are disabled in 'rest_server.conf'."
         echo "   All Backups of all users are written into the same directory '$dir_data'."
         echo
-)       
-test $noauth -ne 0       || (
+)
+
+test "$noauth" -eq "0" || (
         echo "⚠️ WARNING: authentication is disabled in 'rest_server.conf'."
         echo "   Backup data can be accessed by all other users (but are still encrypted)."
         echo "   To fix it:"
@@ -241,7 +242,7 @@ test $noauth -ne 0       || (
 )
 
 if [ ! -x bcrypt/bcrypt-tool ]; then
-        echo "⚠️ WARNING: bcrypt-tool is not installed. Please run './install.sh' first."
+        echo "⚠️ WARNING: bcrypt-tool is not installed. Please run './install.sh'."
         echo "   Blowfish password hashes cannot be created and you need to enable"
         echo "   the unsafe option 'noauth=1' in 'rest_server.conf'."
         echo
