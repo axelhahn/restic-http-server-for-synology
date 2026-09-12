@@ -14,7 +14,7 @@ But you can repeat `./useradmin.sh add USERNAME` to set a new password and updat
 
 Execute `./useradmin.sh status` to see all users and their used size.
 
-![Help of user admin](../docs/images/useradmin_help.png)
+![Help of user admin](images/useradmin_help.png)
 
 ### Start service
 

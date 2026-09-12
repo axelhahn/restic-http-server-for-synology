@@ -45,7 +45,7 @@ useradmin.sh
 
 Execute `sudo ./install.sh` to download the latest version of the required single binaries of restic rest server and bcrypt and initialize the service.
 
-![Start fresh installation](../docs/images/install_start.png)
+![Start fresh installation](images/install_start.png)
 
 The reuslt is
 
