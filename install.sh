@@ -16,6 +16,7 @@
 # 2021-03-31  www.axelhahn.de  create logrotate.d
 # 2025-12-26  www.axelhahn.de  fetch version from h2 node (arm64 linux compiled version is not available in html source)
 # 2026-05-28  basti122303      add multi-arch support
+# 2026-09-12  www.axelhahn.de  install bcrypt-tool
 # ======================================================================
 
 set -e
@@ -24,10 +25,11 @@ set -e
 # CONFIG
 # ------------------------------------------------------------
 
-# GitHub release base URL
-urlBase="https://github.com/restic/rest-server/releases/download"
-resticVersion=
+# GitHub <author>/<project>
+projectRest="restic/rest-server"
+projectBcrypt="shoenig/bcrypt-tool"
 
+remoteVersionRest=
 resticLink=rest-server
 
 resticScript=rest_server.sh
@@ -39,8 +41,8 @@ logrotation=/etc/logrotate.d/restic_server
 # ------------------------------------------------------------
 
 function _quit(){
-        echo "❌ CRITICAL ERROR: $*"
-        exit 1
+        >&2 echo "❌ CRITICAL ERROR: $*"
+        >&2 exit 1
 }
 
 function _h2(){
@@ -50,34 +52,45 @@ function _h2(){
         echo
 }
 
+function _hr(){
+    echo
+    echo "-------------------------------------------------------------------------------"
+    echo
+}
+
 function _getLocalVersion(){
-        # test -x $resticLink/rest_server && $resticLink/rest_server -V | cut -f 2 -d ' '
+        local _prj="$1"
 
-        # works in v0.10.0
-        # $resticLink/rest-server -V 2>/dev/null | cut -f 2 -d ' '
-
-        # works in v0.14.0
-        # $resticLink/rest-server -v 2>/dev/null | cut -f 4 -d ' '
-
-        ls -1 | grep "rest-server_[0-9].*_" | cut -f 2 -d '_' | sort -n | tail -1
+        case "$_prj" in
+            $projectBcrypt)
+                ls -1 bcrypt/*gz 2>/dev/null | sort -n | tail -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo ""
+                ;;
+            $projectRest)
+                # ls -1 rest-server*gz  | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' 
+                ls -1 | grep "rest-server_[0-9].*_" | sort -n | tail -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo ""
+                # ./rest-server/rest-server --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
+                ;;
+            *)
+                _quit "Unknown tool: $_tool"
+                ;;
+        esac
 }
 
 # ---------------------------------------------------------------------
 # GET LATEST VERSION FROM GITHUB
-# (simple HTML scrape, no API dependency)
+# param  1: project name (e.g. restic/rest-server)
 # ---------------------------------------------------------------------
 function _getRemoteVersion() {
-	curl -s https://api.github.com/repos/restic/rest-server/releases/latest |
-    grep '"tag_name"' |
-    cut -d '"' -f4 |
-    sed 's/^v//'
+    local _prj="$1"
+	curl -s "https://api.github.com/repos/${_prj}/releases/latest" | grep '"tag_name"' | cut -d '"' -f4 | sed 's/^v//'
+exit
 }
 
 # ---------------------------------------------------------------------
 # ARCH DETECTION
 # Maps uname -m → rest-server binary naming
 # ---------------------------------------------------------------------
-get_arch() {
+function get_arch() {
     case "$(uname -m)" in
         x86_64)
             echo "linux_amd64"
@@ -94,6 +107,33 @@ get_arch() {
     esac
 }
 
+function downloadAndExtract() {
+    local _url="$1"
+    local _targetdir="$2"
+    
+    local _dlFile="$( basename "$url" )"
+
+    # remark: a subshell to finish in the same directory
+    (
+        _h2 "Download ${_url}"
+        if [ -n "$_targetdir" ]; then
+            mkdir -p "$_targetdir" || _quit "Unable to create target directory: $_targetdir"
+            cd "$_targetdir" || _quit "Unable to change to target directory: $_targetdir"
+        fi
+        if [ -f "$_dlFile" ]; then
+            echo "SKIP download: $_dlFile already exists"
+        else
+            if ! wget -O ${_dlFile}.tmp -S "$url"; then
+                _quit "Download failed for URL: $_url"
+            fi
+            mv ${_dlFile}.tmp ${_dlFile}
+        fi
+
+        _h2 "Extract ${_dlFile}"
+        pwd
+        tar -xvzf "${_dlFile}" || _quit "Extraction failed."
+    )
+}
 
 # ------------------------------------------------------------
 # MAIN
@@ -111,37 +151,44 @@ echo "
 
 
     INSTALLER
-
 "
 cd $( dirname $0 ) || _quit "cannot change directory ..."
+
+_hr
 
 # Detect CPU architecture
 arch=$(get_arch)
 echo "[INFO] architecture: $arch"
 
-resticVersion=$( _getRemoteVersion )
-localversion=$( _getLocalVersion )
+# # remoteVersionRest=$( _getRemoteVersion "${urlBaseRest}" )
+remoteVersionRest=$( _getRemoteVersion "${projectRest}" )
+localResticVersion=$( _getLocalVersion "${projectRest}" )
 echo "
-[INFO] remote version: $resticVersion
-[INFO] local version : $localversion"
+[INFO] remote version: $remoteVersionRest
+[INFO] local version : $localResticVersion"
 
-test -z "$resticVersion" && _quit "Unable to detect remote version from $urlBase"
+# test -z "$remoteVersionRest" && _quit "Unable to detect remote version."
 
-if [ -z "$localversion" ]; then
+if [ -z "$localResticVersion" ]; then
     echo "
     
     WELCOME
 
     This installer brings up the Restic rest server on your Synology NAS. 
 
-    It will download the latest version of the rest-server binary and install 
-    it in the current directory.
+    (1)
+    It will download the latest version of 
+         - rest-server binary - to start http restic server
+         - bcrypt binary      - to create blowfish hashes in .htpasswd file
+    and install it in the current directory.
 
+    (2)
     Needed working directories will be created.
     
+    (3)
     Autostart of Restic rest service will be enabled.
 "
-elif [ "$resticVersion" = "$localversion" ]; then
+elif [ "$remoteVersionRest" = "$localResticVersion" ]; then
     echo "       --> Versions are equal - reinstalling current version"
 else 
     echo "       --> Update was found"
@@ -149,26 +196,38 @@ fi
 echo
 echo -n "Press ENTER to continue or Ctrl + C to abort ... "; read dummy
 
-urlRestic="${urlBase}/v${resticVersion}/rest-server_${resticVersion}_${arch}.tar.gz"
-dlFile=$( basename $urlRestic )
-resticDir=rest-server_${resticVersion}_${arch}
+resticDir=rest-server_${remoteVersionRest}_${arch}
 
+_hr
 
-_h2 "Download"
-echo "[INFO] download URL: $urlRestic"
-if [ -f $dlFile ]; then
-        echo "SKIP download"
-else
-        wget -O ${dlFile}.running -S $urlRestic \
-                && mv ${dlFile}.running ${dlFile}
-fi
-test -f $dlFile || _quit "Download failed."
+echo "Download tools from Github..."
+echo
 
+for myproject in "${projectRest}" "${projectBcrypt}"
+do
+    echo
+    echo "-----=====#####|  $myproject"
+    echo
+    urlBase="https://github.com/${myproject}/releases"
 
-_h2 "Extract ${dlFile}"
-tar -xzf ${dlFile} || _quit "Extraction failed."
-ls -ld $resticDir || _quit "Extraction was done ... but expected dir $resticDir does not exist. I am confused :-/"
+    remoteVersion=$( _getRemoteVersion "${myproject}" )
+    echo "Version on server: $remoteVersion"
 
+    localVersion=$( _getLocalVersion "${myproject}" )
+    echo "Version local    : $localVersion"
+
+    prj="$( echo "$myproject" | cut -f 2 -d '/' )"
+    url="${urlBase}/download/v${remoteVersion}/${prj}_${remoteVersion}_${arch}.tar.gz"
+    target=""; test "$myproject" = "${projectBcrypt}" && target="bcrypt"
+
+    downloadAndExtract "${url}" "${target}"
+done
+
+_hr
+echo "Preparing local files ..."
+echo
+
+resticDir=rest-server_${remoteVersionRest}_${arch}
 
 _h2 "Create Link"
 rm -f $resticLink || true
@@ -213,7 +272,7 @@ cat $autostart
 
 _h2 'Add logrotation'
 cat << EOLOG >$logrotation
-$(pwd )/$logfile {
+$( pwd )/$logfile {
   rotate 7
   daily
   compress
@@ -234,6 +293,7 @@ EOLOG
 ls -l $logrotation || _quit "unable to create logrotation file"
 # cat /etc/logrotate.d/restic_server
 
+_hr
 
 echo "
 

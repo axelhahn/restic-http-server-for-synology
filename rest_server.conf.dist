@@ -32,7 +32,7 @@ logfile=log/restic-server.log
 #
 appendonly=0
 privaterepos=1
-noauth=1
+noauth=0
 
 
 # ----------------------------------------------------------------------
