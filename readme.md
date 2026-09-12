@@ -10,6 +10,16 @@ A set of bash scripts to
 
 📄 Source: https://github.com/axelhahn/restic-http-server-for-synology \
 📜 License GNU GPL 3.0
+📗 Docs: see <https://www.axel-hahn.de/docs/restic-http-server-for-synology/>
+
+---
+
+Thanks go to to 
+
+* [restic](https://github.com/restic) for the [rest-server](https://github.com/restic/rest-server)
+* [shoenig](https://github.com/shoenig) for the [bcrypt-tool](https://github.com/shoenig/bcrypt-tool)
+* [basti122303](https://github.com/basti122303) for adding multi-arch support 
+
 
 Latest tested versions:
 
@@ -155,7 +165,7 @@ pwlength=32
 The default config activates private repos (see restic http doc for description).
 In short: a user [user] gets access to [backup-url]:[port]/[user]/ only ... with its own password.
 
-Execute `./useradmin.sh add USERNAME` to create (or update) a user with a generated password (32 chars by default).
+Execute `./useradmin.sh add USERNAME` to create a user with a generated password (32 chars by default).
 Copy and paste the shown password in the output to your restic client config. The password visible only once.
 
 It is not possible to show the password again.
@@ -234,6 +244,7 @@ DONE
 * autostart service on reboot
 * handle users with encrypted password in .htpasswd 
 * logrotation; installer creates file in /etc/logrotate.d/ (if it fails you can create a cronjob)
+* generate right .htacces entries with openssl to set noauth=0
 
 TODO
 

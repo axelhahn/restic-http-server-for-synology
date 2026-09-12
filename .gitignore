@@ -1,3 +1,6 @@
+bcrypt/*
+data/*
+log/*
 rest_server.conf
 rest-server
 rest-server_*
