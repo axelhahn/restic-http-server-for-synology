@@ -19,7 +19,7 @@ Latest tested versions:
 
 ### What is Restic?
 
-![Home network](../docs/images/home-network.drawio.png)
+![Home network](images/home-network.drawio.png)
 
 Restic **client**: https://restic.net/ - it is an opensource backup tool. 
 
