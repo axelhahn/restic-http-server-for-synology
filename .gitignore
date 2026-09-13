@@ -4,3 +4,4 @@ log/*
 rest_server.conf
 rest-server
 rest-server_*
+upgrade.sh
