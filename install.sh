@@ -168,6 +168,7 @@ echo "
 [INFO] local version : $localResticVersion"
 
 # test -z "$remoteVersionRest" && _quit "Unable to detect remote version."
+test -f rest_server.conf.dist && cp -fp upgrade.sh.dist upgrade.sh
 
 if [ -z "$localResticVersion" ]; then
     echo "

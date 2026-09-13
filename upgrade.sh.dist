@@ -1,0 +1,42 @@
+#!/bin/bash
+set -e
+
+cd "$( dirname "$0")"
+function h2() { 
+    echo ">>> $*" 
+}
+
+
+echo "
+   ▞▀▖         ▜               ▛▀▖      ▐  ▗     ▞▀▖               
+   ▚▄ ▌ ▌▛▀▖▞▀▖▐ ▞▀▖▞▀▌▌ ▌ ▄▄▖ ▙▄▘▞▀▖▞▀▘▜▀ ▄ ▞▀▖ ▚▄ ▞▀▖▙▀▖▌ ▌▞▀▖▙▀▖
+   ▖ ▌▚▄▌▌ ▌▌ ▌▐ ▌ ▌▚▄▌▚▄▌     ▌▚ ▛▀ ▝▀▖▐ ▖▐ ▌ ▖ ▖ ▌▛▀ ▌  ▐▐ ▛▀ ▌  
+   ▝▀ ▗▄▘▘ ▘▝▀  ▘▝▀ ▗▄▘▗▄▘     ▘ ▘▝▀▘▀▀  ▀ ▀▘▝▀  ▝▀ ▝▀▘▘   ▘ ▝▀▘▘  
+
+
+    INSTALL AND UPGRADE
+
+"
+
+
+h2 "Downloading latest version from GitHub..."
+curl -s -o master.tar.gz https://codeload.github.com/axelhahn/restic-http-server-for-synology/tar.gz/refs/heads/master
+
+h2 "Extracting..."
+tar -xzf master.tar.gz
+
+test -f install.sh && (
+    h2 "Wiping current files..."
+    rm -rf docs install.sh readme.md rest_server.conf.dist rest_server.sh upgrade.dist.sh useradmin.sh || true
+)
+
+h2 "Adding new files..."
+cd restic-http-server-for-synology-master
+cp -rpf * ..
+cd ..
+rm -rf restic-http-server-for-synology-master master.tar.gz
+echo
+echo "  🏅 Base files were updated!"
+read -p "  Press ENTER to continue or Ctrl+C to abort and run 'sudo ./install.sh' later ..."
+echo
+./install.sh
