@@ -10,11 +10,15 @@
 # ------------------------------------------------------------
 # License: GNU GPL 3.0
 # ------------------------------------------------------------
-# 2021-03-29  www.axelhahn.de  init ... but WIP
-# 2021-05-09  www.axelhahn.de  added delete param
-# 2026-09-12  www.axelhahn.de  use blowfish password hashes
+# 2021-03-29  www.axelhahn.de        init ... but WIP
+# 2021-05-09  www.axelhahn.de        added delete param
+# 2026-09-12  www.axelhahn.de        use blowfish password hashes
+# 2026-09-15  www.axelhahn.de  v0.5  add colors; ask before deleting a user
 # ============================================================
 
+
+cd "$( dirname "$0")" || exit 1
+. inc_shared.sh || exit 2
 
 #defaults
 typeset -i privaterepos=1
@@ -28,10 +32,6 @@ typeset -i pwlength=32
 
 function _generate_password(){
         head /dev/urandom | tr -dc A-Za-z0-9 | head -c $pwlength
-}
-
-function _encrypt_apr1(){
-        openssl passwd -apr1 $1
 }
 
 function _encrypt_blowfish(){
@@ -54,8 +54,7 @@ function _update_htpasswd(){
         rm "${htfile}.tmp"
 
         if [ ! -f "${htfile}" ]; then
-                echo "❌ ERROR: unable to create ${htfile}. Abort."
-                exit 1
+                _quit "Unable to create ${htfile}. Abort." 1
         fi
         echo
         echo "✅ OK."
@@ -63,21 +62,18 @@ function _update_htpasswd(){
 
 function add(){
         local myuser=$1
-        echo "ADD user '$myuser'"
-        echo
+        _h2 "ADD user $myuser"
         if [ -z "$myuser" ]; then
-                echo -n 'Username: '
+                echo -n 'Username to add: '
                 read myuser
                 if [ -z "$myuser" ]; then
-                        echo "Abort."
-                        exit 1
+                        _quit "Abort. No username was given" 1
                 fi
         fi
 
         cat "${htfile}" 2>/dev/null | grep "^${myuser}:" >/dev/null
         if [ $? -eq 0 ]; then
-                echo "❌ ERROR: User already exists"
-                exit 1
+                _quit "User already exists" 1
         fi
         echo 'Creating new user ...'
 
@@ -88,21 +84,21 @@ function add(){
 
 function update(){
         local myuser=$1
-        echo "UPDATE password for user '$myuser'"
-        echo
+        _h2 "UPDATE password for exiting user $myuser"
         if [ -z "$myuser" ]; then
-                echo -n 'Username: '
+                cat ${htfile} | grep "^[a-zA-Z]"  | cut -f 1 -d ':' | sed "s#^#    #g"
+                echo
+
+                echo -n 'Username to update: '
                 read myuser
                 if [ -z "$myuser" ]; then
-                        echo "Abort."
-                        exit 1
+                        _quit "Abort. No username was given" 1
                 fi
         fi
 
         cat "${htfile}" 2>/dev/null | grep "^${myuser}:" >/dev/null
         if [ $? -ne 0 ]; then
-                echo "❌ ERROR: User does not exist: '${myuser}'"
-                exit 1
+                _quit "User does not exist: '${myuser}'" 1
         fi
         echo "Setting a new password ..."
 
@@ -132,24 +128,26 @@ function pwhint(){
 }
 function delete(){
         local myuser=$1
-        echo "DELETE user '${myuser}'"
-        echo
         if [ -z "$myuser" ]; then
                 status
-
-                echo -n 'Username to delete: '
+                _h2 "DELETE user ${myuser}"
+                echo -n 'Username to delete (incl. its data): '
                 read myuser
                 if [ -z "$myuser" ]; then
-                        echo "Abort."
-                        exit 1
+                        _quit "Abort. No username was given" 1
                 fi
+        else
+                _h2 "DELETE user ${myuser}"
         fi
         cat "${htfile}" 2>/dev/null | grep "^${myuser}:" >/dev/null
         if [ $? -ne 0 ]; then
-                echo "❌ ERROR: user '$myuser' does not exist in ${htfile}. Use parameter 'status' to get a list of existing users."
-                exit 1
+                _quit "User '$myuser' does not exist in ${htfile}. Use parameter 'status' to get a list of existing users." 1
         fi
-        echo
+        read -p "Are you really sure to delete user and all its data [y/N]? " yn
+        case $yn in
+                [Yy]*) ;;
+                *) _quit "Abort." 1 ;;
+        esac
 
         echo '--- deleting backup data:'
         test -d "$dir_data/$myuser" || echo 'SKIP: no backup data were found'
@@ -164,20 +162,21 @@ function delete(){
 
 }
 function status(){
-        echo STATUS
-        echo
+        _h2 "STATUS"
         local tbl='%-10s %-65s %s'
         local tblline='-----------------------------------------------------------------------------------------------'
+        local myuser
+
         echo '--- htpasswd file:'
         if ! ls -l $htfile 2>/dev/null; then
                 echo "ERROR: The htpasswd file $htfile does not exist yet."
                 echo "Run command 'add' to create a first user."
                 exit 1
         fi
-        echo
 
         typeset -i local iUsers=$( cat ${htfile} | grep "^[a-zA-Z]" | wc -l )
-        echo "Users: $iUsers"
+        echo
+        color.echo cyan "Users: $iUsers"
         if [ $iUsers -gt 0 ]; then
                 echo
                 printf "$tbl\n" 'User' 'password hash' 'used space'
@@ -212,19 +211,8 @@ cd `dirname $0`
 . rest_server.conf
 htfile=$dir_data/.htpasswd
 
-# https://patorjk.com/software/taag/#p=display&f=Small+Block&t=Synology+-+Restic+Server&x=none&v=4&h=4&w=80&we=false
-echo "
-   ▞▀▖         ▜               ▛▀▖      ▐  ▗     ▞▀▖               
-   ▚▄ ▌ ▌▛▀▖▞▀▖▐ ▞▀▖▞▀▌▌ ▌ ▄▄▖ ▙▄▘▞▀▖▞▀▘▜▀ ▄ ▞▀▖ ▚▄ ▞▀▖▙▀▖▌ ▌▞▀▖▙▀▖
-   ▖ ▌▚▄▌▌ ▌▌ ▌▐ ▌ ▌▚▄▌▚▄▌     ▌▚ ▛▀ ▝▀▖▐ ▖▐ ▌ ▖ ▖ ▌▛▀ ▌  ▐▐ ▛▀ ▌  
-   ▝▀ ▗▄▘▘ ▘▝▀  ▘▝▀ ▗▄▘▗▄▘     ▘ ▘▝▀▘▀▀  ▀ ▀▘▝▀  ▝▀ ▝▀▘▘   ▘ ▝▀▘▘  
-
-📄 Source: https://github.com/axelhahn/restic-http-server-for-synology
-📜 License GNU GPL 3.0
-
-
-        USER ADMIN
-"
+header
+echo "    USER ADMINISTRATION"
 
 test "$privaterepos" = "0" && (
         echo "⚠️ WARNING: private repos are disabled in 'rest_server.conf'."
@@ -248,14 +236,13 @@ if [ ! -x bcrypt/bcrypt-tool ]; then
         echo
 fi
 
-echo
-
 case "$1" in
         add) add $2 ;;
         update) update $2 ;;
         delete) delete $2 ;;
         status) status ;;
         *)
+                _h2 "HELP"
                 echo "USAGE: `basename $0` ACTION [user]"
                 echo
                 echo "ACTIONS:"

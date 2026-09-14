@@ -17,9 +17,12 @@
 # 2025-12-26  www.axelhahn.de  fetch version from h2 node (arm64 linux compiled version is not available in html source)
 # 2026-05-28  basti122303      add multi-arch support
 # 2026-09-12  www.axelhahn.de  install bcrypt-tool
+# 2026-09-15  www.axelhahn.de  v0.5  add colors; add upgrade tool
 # ======================================================================
 
-set -e
+# set -e
+cd "$( dirname "$0")" || exit 1
+. inc_shared.sh || exit 2
 
 # ------------------------------------------------------------
 # CONFIG
@@ -40,21 +43,9 @@ logrotation=/etc/logrotate.d/restic_server
 # FUNCTIONS
 # ------------------------------------------------------------
 
-function _quit(){
-        >&2 echo "❌ CRITICAL ERROR: $*"
-        >&2 exit 1
-}
-
-function _h2(){
-        echo
-        echo
-        echo "_____/  $*"
-        echo
-}
-
 function _hr(){
     echo
-    echo "-------------------------------------------------------------------------------"
+    color.echo yellow "-------------------------------------------------------------------------------"
     echo
 }
 
@@ -139,19 +130,10 @@ function downloadAndExtract() {
 # MAIN
 # ------------------------------------------------------------
 
-# https://patorjk.com/software/taag/#p=display&f=Small+Block&t=Synology+-+Restic+Server&x=none&v=4&h=4&w=80&we=false
-echo "
-   ▞▀▖         ▜               ▛▀▖      ▐  ▗     ▞▀▖               
-   ▚▄ ▌ ▌▛▀▖▞▀▖▐ ▞▀▖▞▀▌▌ ▌ ▄▄▖ ▙▄▘▞▀▖▞▀▘▜▀ ▄ ▞▀▖ ▚▄ ▞▀▖▙▀▖▌ ▌▞▀▖▙▀▖
-   ▖ ▌▚▄▌▌ ▌▌ ▌▐ ▌ ▌▚▄▌▚▄▌     ▌▚ ▛▀ ▝▀▖▐ ▖▐ ▌ ▖ ▖ ▌▛▀ ▌  ▐▐ ▛▀ ▌  
-   ▝▀ ▗▄▘▘ ▘▝▀  ▘▝▀ ▗▄▘▗▄▘     ▘ ▘▝▀▘▀▀  ▀ ▀▘▝▀  ▝▀ ▝▀▘▘   ▘ ▝▀▘▘  
-   
-📄 Source: https://github.com/axelhahn/restic-http-server-for-synology
-📜 License GNU GPL 3.0
+header
+echo "    INSTALLER"
+echo
 
-
-    INSTALLER
-"
 cd $( dirname $0 ) || _quit "cannot change directory ..."
 
 _hr
@@ -207,7 +189,7 @@ echo
 for myproject in "${projectRest}" "${projectBcrypt}"
 do
     echo
-    echo "-----=====#####|  $myproject"
+    color.echo cyan "-----=====#####|  $myproject"
     echo
     urlBase="https://github.com/${myproject}/releases"
 

@@ -1,7 +1,20 @@
 #!/bin/bash
+# ============================================================
+#
+# UPGRADE TOOL FOR .RESTIC HTTP SERVER
+# ON SYNOLOGY NAS
+#
+# This script downloads the minimal set of bash scripts
+#
+# ------------------------------------------------------------
+# License: GNU GPL 3.0
+# ------------------------------------------------------------
+# 2026-09-15  www.axelhahn.de  v0.5  first version of upgrade tool
+# ============================================================
+
 set -e
 
-cd "$( dirname "$0")"
+cd "$( dirname "$0")" || exit 1
 function h2() { 
     echo ">>> $*" 
 }
@@ -17,7 +30,6 @@ echo "
     INSTALL AND UPGRADE
 
 "
-
 
 h2 "Downloading latest version from GitHub..."
 curl -s -o master.tar.gz https://codeload.github.com/axelhahn/restic-http-server-for-synology/tar.gz/refs/heads/master
@@ -35,6 +47,7 @@ cd restic-http-server-for-synology-master
 cp -rpf * ..
 cd ..
 rm -rf restic-http-server-for-synology-master master.tar.gz
+
 echo
 echo "  🏅 Base files were updated!"
 read -p "  Press ENTER to continue or Ctrl+C to abort and run 'sudo ./install.sh' later ..."
