@@ -21,7 +21,29 @@ Via SSH console:
 # Create directory
 sudo mkdir -p /volume1/opt/restic
 cd /volume1/opt/restic
+```
 
+#### Variant: download installer/ upgrader
+
+```shell
+curl -o upgrade.sh https://raw.githubusercontent.com/axelhahn/restic-http-server-for-synology/refs/heads/master/upgrade.sh.dist
+chmod 0755 upgrade.sh
+sudo ./upgrade.sh
+```
+
+![Start fresh installation](images/upgrade_start.png)
+
+This script will download the shell scripts and afterwards starts the installer.
+
+This is the faster way.
+
+![Start fresh installation](images/install_start.png)
+
+#### Variant: manual installation
+
+For historical reasons or if you don't want to use the installer `upgrade.sh`, you perform all install steps manually:
+
+```shell
 # get the sources
 sudo curl -o master.tar.gz https://codeload.github.com/axelhahn/restic-http-server-for-synology/tar.gz/refs/heads/master
 sudo tar -xzf master.tar.gz
@@ -35,33 +57,48 @@ The result is something like that:
 
 ```shell
 # ls -1
-install.sh
+color.class.sh
+inc_shared.sh
+install.sh*          <<<<<
+readme.md
 rest_server.conf.dist
-rest_server.sh
-useradmin.sh
+rest_server.sh*
+upgrade.sh.dist*
+useradmin.sh*
 ```
 
-### Run installer
+In the list of files is the installer.
 
 Execute `sudo ./install.sh` to download the latest version of the required single binaries of restic rest server and bcrypt and initialize the service.
 
 ![Start fresh installation](images/install_start.png)
 
-The reuslt is
+The reuslt is:
+
+* bcrypt was installed
+* rest-server was installed
+* rest_server.conf was created
+* dubdirs dta and log were created
 
 ```txt
 # ls -1
-bcrypt
-data
-install.sh
-log
-rest-server
-rest-server_0.14.0_linux_arm64
-rest-server_0.14.0_linux_arm64.tar.gz
+bcrypt/
+color.class.sh
+data/
+docs/
+inc_shared.sh
+install.sh*
+log/
+readme.md
+rest-server@
+rest-server_0.14.0_linux_amd64/
+rest-server_0.14.0_linux_amd64.tar.gz
 rest_server.conf
 rest_server.conf.dist
-rest_server.sh
-useradmin.sh
+rest_server.sh*
+upgrade.sh*
+upgrade.sh.dist*
+useradmin.sh*
 ```
 
 The installer also creates a /usr/local/etc/rc.d/rest_server.sh - which is a softlink to rest_server.sh in your installation directory.

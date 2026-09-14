@@ -5,12 +5,13 @@ It finds a new version of Restic rest server and brypt and installs it in the cu
 
 Udate scripts:
 
-* Execute `sudo ./upgrade.sh` to download the latest versions of the scripts 
-* OR: execute steps im "Get sources" to download the current version from Github in [Installation](20_Installation.md)
+Execute `sudo ./upgrade.sh` to download the latest versions of the scripts. 
 
-Upgrade restic rest server.
+![Start the upgrade tool](images/upgrade_start.png)
 
-* Execute `sudo ./install.sh` to download the latest binaries
+Afterwards it will start the newly downloaded `./install.sh` to download/ upgrade needed binaries.
+
+![Start the upgrade tool](images/install_upgrade.png)
 
 After update/ upgrade:
 

@@ -1,7 +1,7 @@
 {
     "title": "restic-http-server-for-synology",
     "author": "Axel Hahn",
-    "tagline": "__DESCRIPTION__",
+    "tagline": "A set of bash scripts to install and run a rest http server on a Synology NAS",
     "ignore": {
         "files": ["30_PHP-client/Plugins/Checks/_skeleton.md"],
         "folders": ["99_Not_Ready"]
