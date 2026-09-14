@@ -26,11 +26,6 @@ PRODUCT='RESTIC REST SERVER'
 # FUNCTIONS
 # ----------------------------------------------------------------------
 
-function UNUSEDcheck_config(){
-        local typeset -i iErrors=0
-        test -f mydir/rest_server.conf
-}
-
 function check_running_server(){
         ps -ef | grep $mybin | grep -v grep | grep .
 }
