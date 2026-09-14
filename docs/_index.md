@@ -9,7 +9,7 @@
 
 👤 Author: Axel Hahn\
 🧾 Source: <https://github.com/axelhahn/restic-http-server-for-synology/>\
-📜 License: GNU GPL 3.0\
+📜 License: GNU GPL 3.0 \
 📗 Docs: see <https://www.axel-hahn.de/docs/restic-http-server-for-synology/>
 
 ---
