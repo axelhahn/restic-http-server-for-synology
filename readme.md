@@ -9,7 +9,7 @@ A set of bash scripts to
 * A user administration for access to private repos; it handles user entries in [webroot]/.htpasswd (using openssl)
 
 📄 Source: https://github.com/axelhahn/restic-http-server-for-synology \
-📜 License GNU GPL 3.0
+📜 License GNU GPL 3.0 \
 📗 Docs: see <https://www.axel-hahn.de/docs/restic-http-server-for-synology/>
 
 ---
@@ -39,196 +39,15 @@ If you have a Synology NAS at home then this repository helps you to install tha
 
 On your Windows/ Linux/ Mac OS client you additionally need to install the client and configure the backend url of the https server.
 
-## 🪄 Installation
+## 🖥️ Screenshots
 
-Remark: since DSM 7.2 (?) `sudo -i` isn't allowed anymore to open a shell as root and execute all commands. All actions are written with sudo in front now.
-
-### Prepare
-
-Web based stuff:
-
-* Login into the web ui of your Synology with an admin user
-* Activate DDNS for your NAS
-* Activate ssl certificate for your NAS (what is using Let's Encrypt in the background)
-
-### Get sources
-
-Via SSH console:
-
-* Login to your Synology with an admin account
-* Create a directory, and get the files of the project there
-
-```shell
-# Create directory
-sudo mkdir -p /volume1/opt/restic
-cd /volume1/opt/restic
-
-# get the sources
-sudo curl -o master.tar.gz https://codeload.github.com/axelhahn/restic-http-server-for-synology/tar.gz/refs/heads/master
-sudo tar -xzf master.tar.gz
-cd restic-http-server-for-synology-master
-sudo cp -rp * ..
-cd ..
-sudo rm -rf restic-http-server-for-synology-master master.tar.gz
-```
-
-The result is something like that:
-
-```shell
-# ls -1
-install.sh
-rest_server.conf.dist
-rest_server.sh
-useradmin.sh
-```
-
-### Run installer
-
-Execute `sudo ./install.sh` to download the latest version of the required single binary of restic rest server and initialize the service.
+Installer:
 
 ![Start fresh installation](docs/images/install_start.png)
 
-The reuslt is
-
-```txt
-# ls -1
-data
-install.sh
-log
-rest-server
-rest-server_0.14.0_linux_arm64
-rest-server_0.14.0_linux_arm64.tar.gz
-rest_server.conf
-rest_server.conf.dist
-rest_server.sh
-useradmin.sh
-```
-
-The installer also creates a /usr/local/etc/rc.d/rest_server.sh - which is a softlink to rest_server.sh in your installation directory.
-With that link the restic http server will start automatically if your Synology nas is (re-)booting.
-
-### See the config
-
-There is no need to change at this point ... but have a look:
-
-```shell
-root@nas:/volume1/opt/restic# cat rest_server.conf
-# ======================================================================
-#
-# HTTP REST SERVER CONFIG FILE
-#
-#
-# a relative path is relative to restic_server.sh - or use absolute
-#
-# ======================================================================
-
-
-
-# where to find binary of http rest server - no need to change
-dir_server=rest-server
-
-# place of key and cert; it is specific for Synonlogy NAS - no need to change
-dir_cert=/usr/syno/etc/certificate/system/default
-
-
-# listen port of rest server; 8000 is default
-listen=':8000'
-
-# webroot of backup data
-dir_data=data
-
-# path of log
-logfile=log/restic-server.log
-
-
-# ----------------------------------------------------------------------
-#
-# flags for restic server process
-#
-appendonly=0
-privaterepos=1
-noauth=1
-
-
-# ----------------------------------------------------------------------
-#
-# user admin
-#
-# length of user password for a new user
-pwlength=32
-
-# ----------------------------------------------------------------------
-```
-
-### Create a user for http access
-
-The default config activates private repos (see restic http doc for description).
-In short: a user [user] gets access to [backup-url]:[port]/[user]/ only ... with its own password.
-
-Execute `./useradmin.sh add USERNAME` to create a user with a generated password (32 chars by default).
-Copy and paste the shown password in the output to your restic client config. The password visible only once.
-
-It is not possible to show the password again.
-
-But you can repeat `./useradmin.sh add USERNAME` to set a new password and update the client config.
-
-Execute `./useradmin.sh status` to see all users and their used size.
+User admin:
 
 ![Help of user admin](docs/images/useradmin_help.png)
-
-### Start service
-
-`sudo ./rest_server.sh start` is our service script for start/ stop/ restart restic http and logrotation.
-
-```
-# sudo ./rest_server.sh
-USAGE: rest_server.sh [start|stop|status|restart|logrotate]
-```
-
-Execute `sudo ./rest_server.sh start` to start the restic http server.
-It detects if an ssl certificate was enabled and uses https if possible.
-
-Execute `sudo ./rest_server.sh status` to see the process with PID and full path and used port.
-
-### Logrotation
-
-The installer creates a file for restic http server in /etc/logrotate.d/.
-
-OLD method (which still works):
-
-`./rest_server.sh logrotate` detects existance of restic config file in /etc/logrotate.d/. 
-If it fails the old way works only once per day - it will rotate the logfile with the date as extension.
-Rotated logs older 7d will be deleted.
-
-To run the logrotation regulary:
-In the synology web ui go to the task planner and let execute a custom script daily.
-The Script to execute is
-
-`/volume1/opt/restic/rest_server.sh logrotate`
-or
-`/usr/local/etc/rc.d/rest_server.sh logrotate`
-
-In the beginning you can activate to send an email of each execution. Test the job with run now
-and then check your email inbox.
-
-## 🔁 Update
-
-Udate scripts:
-
-* execute steps im "Get sources" to download the current version from Github
-
-Upgrade restic rest server.
-
-* Execute `sudo ./install.sh` to download the latest binary 
-
-After update/ upgrade:
-
-* run `sudo ./rest_server.sh restart` to restart the restic rest service
-
-If a new Restic rest version was found then delete 
-
-* folder `rest-server_<old-version>*`
-* file `rest-server_<old-version>*.tgz`
 
 ## 👉 Status of this project
 
