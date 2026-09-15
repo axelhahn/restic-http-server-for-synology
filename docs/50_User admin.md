@@ -1,4 +1,13 @@
-## Define users
+## Handle users
+
+With the script `./useradmin.sh` you can handle users for private repositories and passwords for their access.
+You can 
+
+* add a new user
+* update the password for an existing user
+* delete a user
+
+User data are written int a `.htpasswd` file. After any change you need to restart the restic http server to reread the `.htpasswd` file.
 
 ### Show help
 

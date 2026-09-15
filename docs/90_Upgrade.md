@@ -1,15 +1,16 @@
 ## ⏩ Upgrade the software
 
-You can upgrade the software with `./install.sh`.
-It finds a new version of Restic rest server and brypt and installs it in the current directory.
-
-Udate scripts:
+### Udate scripts
 
 Execute `sudo ./upgrade.sh` to download the latest versions of the scripts. 
 
 ![Start the upgrade tool](images/upgrade_start.png)
 
-Afterwards it will start the newly downloaded `./install.sh` to download/ upgrade needed binaries.
+Afterwards it will start the newly downloaded `./install.sh` to download/ upgrade needed binaries. See the next chapter.
+
+### Upgrade Binaries
+
+Execute `sudo ./install.sh` to download the latest version of the required single binaries of restic rest server and bcrypt and initialize the service.
 
 ![Start the upgrade tool](images/install_upgrade.png)
 
@@ -31,7 +32,7 @@ Now you can safely switch to the option `noauth=0` in `rest_server.conf`.
 (1)
 You need to execute 
 
-`./useradmin.sh update <username>`
+`sudo ./useradmin.sh update <username>`
 
 for each user and set the new password on the clients.
 
