@@ -1,4 +1,4 @@
-## 🪄 First steps after a fresh installation
+## First steps after a fresh installation
 
 ### Create a user for http access
 

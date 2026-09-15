@@ -1,4 +1,4 @@
-## 🪄 Installation
+## Installation
 
 Remark: since DSM 7.2 (?) `sudo -i` isn't allowed anymore to open a shell as root and execute all commands. All actions are written with sudo in front now.
 
@@ -17,17 +17,16 @@ Via SSH console:
 * Login to your Synology with an admin account
 * Create a directory, and get the files of the project there
 
+#### Variant: download installer/ upgrader
+
 ```shell
 # Create directory
 sudo mkdir -p /volume1/opt/restic
 cd /volume1/opt/restic
-```
 
-#### Variant: download installer/ upgrader
-
-```shell
-curl -o upgrade.sh https://raw.githubusercontent.com/axelhahn/restic-http-server-for-synology/refs/heads/master/upgrade.sh.dist
-chmod 0755 upgrade.sh
+# get a single script
+sudo curl -o upgrade.sh https://raw.githubusercontent.com/axelhahn/restic-http-server-for-synology/refs/heads/master/upgrade.sh.dist
+sudo chmod 0755 upgrade.sh
 sudo ./upgrade.sh
 ```
 
@@ -39,11 +38,15 @@ This is the faster way.
 
 ![Start fresh installation](images/install_start.png)
 
-#### Variant: manual installation
+#### Variant: manual installation (legacy)
 
 For historical reasons or if you don't want to use the installer `upgrade.sh`, you perform all install steps manually:
 
 ```shell
+# Create directory
+sudo mkdir -p /volume1/opt/restic
+cd /volume1/opt/restic
+
 # get the sources
 sudo curl -o master.tar.gz https://codeload.github.com/axelhahn/restic-http-server-for-synology/tar.gz/refs/heads/master
 sudo tar -xzf master.tar.gz

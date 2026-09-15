@@ -1,4 +1,4 @@
-## ⚙️ See the config
+## See the config
 
 The configuration is in the file `rest_server.conf`.
 
@@ -14,3 +14,4 @@ The configuration is in the file `rest_server.conf`.
 | noauth       | integer | flag: deactivate authentication; add `--no-auth` parameter<br>default: 0
 | pwlength     | integer | length of user password for a new user<br>default: 32
 
+After any change you need to restart the restic http server to reread the config file.
