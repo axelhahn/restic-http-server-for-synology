@@ -10,15 +10,24 @@
 # License: GNU GPL 3.0
 # ------------------------------------------------------------
 # 2026-09-15  www.axelhahn.de  v0.5  first version of upgrade tool
+# 2026-09-16  www.axelhahn.de  v0.6  param support; add intro text
 # ============================================================
 
 set -e
-
 cd "$( dirname "$0")" || exit 1
+
+FLAG_ASK=1
+USAGE="USAGE: `basename $0` [OPTION]
+
+OPTIONS:
+    -h|--help     Show this message
+    -y|--yes      Do not ask for confirmation
+
+"
+
 function h2() { 
     echo ">>> $*" 
 }
-
 
 echo "
    ▞▀▖         ▜               ▛▀▖      ▐  ▗     ▞▀▖               
@@ -26,10 +35,39 @@ echo "
    ▖ ▌▚▄▌▌ ▌▌ ▌▐ ▌ ▌▚▄▌▚▄▌     ▌▚ ▛▀ ▝▀▖▐ ▖▐ ▌ ▖ ▖ ▌▛▀ ▌  ▐▐ ▛▀ ▌  
    ▝▀ ▗▄▘▘ ▘▝▀  ▘▝▀ ▗▄▘▗▄▘     ▘ ▘▝▀▘▀▀  ▀ ▀▘▝▀  ▝▀ ▝▀▘▘   ▘ ▝▀▘▘  
 
+📄 Source: https://github.com/axelhahn/restic-http-server-for-synology
+📜 License: GNU GPL 3.0
+📗 Docs: https://www.axel-hahn.de/docs/restic-http-server-for-synology/
 
-    INSTALL AND UPGRADE
+
+    INSTALL OR UPGRADE
+"
+while [[ "$#" -gt 0 ]]; do case $1 in
+    -h|--help) echo "$USAGE"; exit 0;;
+    -y|--yes) FLAG_ASK=0;shift;;
+    *) if grep "^-" <<< "$1" >/dev/null ; then
+        echo; echo "ERROR: Unknown parameter: $1"; echo; echo "$USAGE"; exit 2
+       fi
+       break;
+       ;;
+esac; done
+
+echo "
+Welcome!
+
+This script will download the latest version of the helper scripts.
+It takes ~1 sec.
+
+The binaries of restic rest server and bcrypt will be downloaded in an extra
+step afterwards by starting ./install.sh.
+
+Your backup data stay untouched!
+The current Restic http service won't be stopped.
+
 
 "
+
+test $FLAG_ASK -eq 1 && ( echo -n "Press ENTER to continue or Ctrl + C to abort ... "; read dummy )
 
 h2 "Downloading latest version from GitHub..."
 curl -s -o master.tar.gz https://codeload.github.com/axelhahn/restic-http-server-for-synology/tar.gz/refs/heads/master
@@ -49,7 +87,9 @@ cd ..
 rm -rf restic-http-server-for-synology-master master.tar.gz
 
 echo
-echo "  🏅 Base files were updated!"
-read -p "  Press ENTER to continue or Ctrl+C to abort and run 'sudo ./install.sh' later ..."
+echo "  🏅 Script files were updated!"
+test $FLAG_ASK -eq 1 && read -p "  Press ENTER to continue or Ctrl+C to abort and run 'sudo ./install.sh' later ..."
 echo
-./install.sh
+test $FLAG_ASK -eq 1 && ./install.sh
+test $FLAG_ASK -eq 0 && ./install.sh --yes
+

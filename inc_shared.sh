@@ -2,7 +2,7 @@
 
 . color.class.sh || exit 2
 
-export _version=0.5
+export _version=0.6
 
 function header(){
 

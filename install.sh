@@ -18,6 +18,7 @@
 # 2026-05-28  basti122303      add multi-arch support
 # 2026-09-12  www.axelhahn.de  install bcrypt-tool
 # 2026-09-15  www.axelhahn.de  v0.5  add colors; add upgrade tool
+# 2026-09-16  www.axelhahn.de  v0.6  param support
 # ======================================================================
 
 # set -e
@@ -27,6 +28,15 @@ cd "$( dirname "$0")" || exit 1
 # ------------------------------------------------------------
 # CONFIG
 # ------------------------------------------------------------
+
+FLAG_ASK=1
+USAGE="USAGE: `basename $0` [OPTION]
+
+OPTIONS:
+    -h|--help     Show this message
+    -y|--yes      Do not ask for confirmation
+
+"
 
 # GitHub <author>/<project>
 projectRest="restic/rest-server"
@@ -134,6 +144,16 @@ header
 echo "    INSTALLER"
 echo
 
+while [[ "$#" -gt 0 ]]; do case $1 in
+    -h|--help) echo "$USAGE"; exit 0;;
+    -y|--yes) FLAG_ASK=0;shift;;
+    *) if grep "^-" <<< "$1" >/dev/null ; then
+        echo; echo "ERROR: Unknown parameter: $1"; echo; echo "$USAGE"; exit 2
+       fi
+       break;
+       ;;
+esac; done
+
 cd $( dirname $0 ) || _quit "cannot change directory ..."
 
 _hr
@@ -164,6 +184,7 @@ if [ -z "$localResticVersion" ]; then
          - rest-server binary - to start http restic server
          - bcrypt binary      - to create blowfish hashes in .htpasswd file
     and install it in the current directory.
+    It takes ~10..15 sec.
 
     (2)
     Needed working directories will be created.
@@ -177,7 +198,8 @@ else
     echo "       --> Update was found"
 fi
 echo
-echo -n "Press ENTER to continue or Ctrl + C to abort ... "; read dummy
+
+test $FLAG_ASK -eq 1 && ( echo -n "Press ENTER to continue or Ctrl + C to abort ... "; read dummy )
 
 resticDir=rest-server_${remoteVersionRest}_${arch}
 
@@ -276,6 +298,25 @@ EOLOG
 ls -l $logrotation || _quit "unable to create logrotation file"
 # cat /etc/logrotate.d/restic_server
 
+
+_h2 "Configuration"
+echo "listen = $( color.print green "\"$listen\"" ) << https port of Restic rest server"
+echo
+
+synohost="$( hostname -f )"
+test -f $dir_cert/ECC-fullchain.pem && (
+    echo "Certificate details:"
+    openssl x509 -noout -text -in $dir_cert/ECC-fullchain.pem | grep -E "(Issuer:|Subject:|Not\ |DNS:)"| sed "s#^\ *#    #g"
+    echo
+    synohost="$( openssl x509 -noout -text -in $dir_cert/ECC-fullchain.pem  | grep "Subject:" | cut -f2 -d= | tr -d " ")"
+) 
+echo "dir_data = $( color.print green "\"$dir_data\"" ) << Directory for backups"
+echo "logfile = $( color.print green "\"$logfile\"" ) << logfile of Restic rest server"
+echo
+echo "appendonly = $( color.print green "$appendonly" ) << append only backup data (no deletion)"
+echo "privaterepos = $( color.print green "$privaterepos" ) << private repos for each user"
+echo "noauth = $( color.print green "$noauth" ) << disable password"
+echo
 _hr
 
 echo "
@@ -286,7 +327,8 @@ echo "
 Have a look to the file 'rest_server.conf'.
 
 (2)
-Create a user to access a private repo with 'sudo ./useradmin.sh add [user]'
+Create one or more user to access a private repo with 
+'sudo ./useradmin.sh add [user]'
 
 (3)
 Then start the server with 'sudo ./rest_server.sh start'.
