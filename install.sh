@@ -124,6 +124,7 @@ function downloadAndExtract() {
         if [ -f "$_dlFile" ]; then
             echo "SKIP download: $_dlFile already exists"
         else
+            # if ! curl --output ${_dlFile}.tmp --follow -i "$url"; then
             if ! wget -O ${_dlFile}.tmp -S "$url"; then
                 _quit "Download failed for URL: $_url"
             fi
@@ -313,10 +314,11 @@ test -f $dir_cert/ECC-fullchain.pem && (
 echo "dir_data = $( color.print green "\"$dir_data\"" ) << Directory for backups"
 echo "logfile = $( color.print green "\"$logfile\"" ) << logfile of Restic rest server"
 echo
-echo "appendonly = $( color.print green "$appendonly" ) << append only backup data (no deletion)"
-echo "privaterepos = $( color.print green "$privaterepos" ) << private repos for each user"
-echo "noauth = $( color.print green "$noauth" ) << disable password"
-echo
+# echo "appendonly = $( color.print green "$appendonly" ) << append only backup data (no deletion)"
+# echo "privaterepos = $( color.print green "$privaterepos" ) << private repos for each user"
+# echo "noauth = $( color.print green "$noauth" ) << disable password"
+# echo
+
 _hr
 
 echo "
