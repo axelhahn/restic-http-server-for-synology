@@ -34,9 +34,28 @@ sudo ./upgrade.sh
 
 This script will download the shell scripts and afterwards starts the installer.
 
-This is the faster way.
+The upgrade script supports the following options:
+
+```txt
+USAGE: upgrade.sh [OPTION]
+
+OPTIONS:
+    -h|--help     Show this message
+    -y|--yes      Do not ask for confirmation
+```
 
 ![Start fresh installation](images/install_start.png)
+
+**Hint**:
+Add `-y` to the command to skip the confirmation prompt.
+
+```txt
+USAGE: install.sh [OPTION]
+
+OPTIONS:
+    -h|--help     Show this message
+    -y|--yes      Do not ask for confirmation
+```
 
 #### Variant: manual installation (legacy)
 

@@ -1,6 +1,6 @@
-## ⏩ Upgrade the software
+## Upgrade the software
 
-### Udate scripts
+### Update scripts
 
 Execute `sudo ./upgrade.sh` to download the latest versions of the scripts. 
 
@@ -8,11 +8,34 @@ Execute `sudo ./upgrade.sh` to download the latest versions of the scripts.
 
 Afterwards it will start the newly downloaded `./install.sh` to download/ upgrade needed binaries. See the next chapter.
 
+**Hint**:
+Add `-y` to the command to skip the confirmation prompt.
+
+```txt
+USAGE: upgrade.sh [OPTION]
+
+OPTIONS:
+    -h|--help     Show this message
+    -y|--yes      Do not ask for confirmation
+```
+
 ### Upgrade Binaries
 
 Execute `sudo ./install.sh` to download the latest version of the required single binaries of restic rest server and bcrypt and initialize the service.
 
 ![Start the upgrade tool](images/install_upgrade.png)
+
+**Hint**:
+Add `-y` to the command to skip the confirmation prompt.
+
+```txt
+USAGE: install.sh [OPTION]
+
+OPTIONS:
+    -h|--help     Show this message
+    -y|--yes      Do not ask for confirmation
+```
+
 
 After update/ upgrade:
 
